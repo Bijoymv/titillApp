@@ -1,0 +1,11 @@
+/* Empty. Add your own CSS if you like */
+.dashList{
+    width:96% !important;
+    margin-bottom: 1px !important;
+    text-align:center;
+}
+
+.dashList .item {
+    margin:5px;
+}
+

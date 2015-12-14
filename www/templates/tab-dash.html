@@ -1,0 +1,19 @@
+<ion-view view-title="Dashboard">
+  <ion-content>
+    <div class="row list dashList" padding="true" ng-repeat="image in images" ng-if="$index % 3 === 0">
+      <div class="col col-33 item" ng-if="$index < images.length">
+          <object type="image/svg+xml" data="{{images[$index].src}}" width="50%"></object>
+          <p>{{images[$index].label}}</p>
+      </div>
+      <div class="col col-33 item" ng-if="$index + 1 < images.length">
+          <object type="image/svg+xml" data="{{images[$index + 1].src}}" width="50%" ></object>
+          <p>{{images[$index + 1].label}}</p>
+      </div>
+      <div class="col col-33 item" ng-if="$index + 2 < images.length">
+          <object data="{{images[$index + 2].src}}" type="image/svg+xml" width="50%">
+          </object>
+          <p>{{images[$index + 2].label}}</p>
+      </div>
+    </div>
+  </ion-content>
+</ion-view>
