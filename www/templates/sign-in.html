@@ -1,0 +1,36 @@
+<ion-view view-title="Titill Login">
+    <ion-content>
+
+            <div class="list">
+                <label class="item item-input">
+                    <input type="text" ng-model="data.username" placeholder="Username">
+                </label>
+                <label class="item item-input">
+                    <input type="password" ng-model="data.password" placeholder="Password">
+                </label>
+            </div>
+            <div class="padding">
+                <button class="button button-block button-assertive" ng-click="login()">
+                    Sign In
+                </button>
+            </div>
+            <div class="padding">
+                <p class="text-center">
+
+
+                    <a href="#/forgot-password"><button class="button button-outline button-assertive">
+                        Forgot password
+                    </button></a>
+                    &nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;
+
+
+                  <!--  <a href="#/sign-up"><button class="button button-outline button-assertive">
+                        Sign Up
+                    </button></a>-->
+
+                </p>
+            </div>
+
+
+    </ion-content>
+</ion-view>

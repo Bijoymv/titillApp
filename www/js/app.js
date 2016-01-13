@@ -5,7 +5,7 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
+angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','ngCordova'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -31,6 +31,22 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
   // Each state's controller can be found in controllers.js
   $stateProvider
 
+  .state('signin', {
+      url: '/sign-in',
+      templateUrl: 'templates/sign-in.html',
+      controller: 'SignInCtrl'
+  })
+  .state('forgotpassword', {
+      url: '/forgot-password',
+      templateUrl: 'templates/forgot-password.html',
+      controller: 'SignInCtrl'
+  })
+  .state('signup', {
+      url: '/sign-up',
+      templateUrl: 'templates/register.html',
+      controller: 'SignInCtrl'
+  })
+
   // setup an abstract state for the tabs directive
     .state('tab', {
     url: '/tab',
@@ -48,6 +64,26 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
         controller: 'DashCtrl'
       }
     }
+  })
+
+  .state('tab.search', {
+      url: '/search/:cityId/:typeCode',
+      views: {
+          'tab-chats': {
+              templateUrl: 'templates/search.html',
+              controller: 'SearchCtrl'
+          }
+      }
+  })
+
+  .state('tab.search-detail', {
+      url: '/search-detail/:userId/:userTypeId',
+      views: {
+          'tab-chats': {
+              templateUrl: 'templates/search-detail.html',
+              controller: 'SearchDetailCtrl'
+          }
+      }
   })
 
   .state('tab.chats', {
@@ -80,7 +116,9 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
   });
 
   // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/tab/dash');
+  //$urlRouterProvider.otherwise('/tab/dash');
+
+  $urlRouterProvider.otherwise('/sign-in');
 
   $ionicConfigProvider.tabs.position('bottom');
 

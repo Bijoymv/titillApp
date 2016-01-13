@@ -1,16 +1,37 @@
-<ion-view view-title="Chats">
-  <ion-content>
+<!--<ion-view view-title="Listing">
+  <ion-content class="padding">
     <ion-list>
-      <ion-item class="item-remove-animate item-avatar item-icon-right" ng-repeat="chat in chats" type="item-text-wrap" href="#/tab/chats/{{chat.id}}">
-        <img ng-src="{{chat.face}}">
-        <h2>{{chat.name}}</h2>
-        <p>{{chat.lastText}}</p>
-        <i class="icon ion-chevron-right icon-accessory"></i>
-
-        <ion-option-button class="button-assertive" ng-click="remove(chat)">
-          Delete
-        </ion-option-button>
+      <ion-item ng-if="userData === true" class="item-remove-animate item-avatar item-icon-right" ng-repeat="users in userList" type="item-text-wrap" href="#/tab/chat-detail/{{users.userpageid}}">
+        <img ng-src="img/default.jpg" ng-if="$index % 2 === 0">
+        <img ng-src="img/default1.jpg" ng-if="$index % 2 !== 0">
+        <h2>{{users.Name}}</h2>
+        <p>{{users.pagename}}</p>
+        <p>{{users.location}}</p>
       </ion-item>
+
     </ion-list>
+      <ion-item  ng-if="userData === false" class="item-remove-animate item-avatar item-icon-right" type="item-text-wrap">
+          <p>No data available</p>
+      </ion-item>
+
   </ion-content>
+</ion-view>-->
+
+
+<ion-view view-title="Listing">
+    <ion-content class="padding">
+<ion-list>
+    <ion-item ng-if="userData === true" class="item-remove-animate item-avatar item-icon-right" ng-repeat="users in userList" type="item-text-wrap" href="#/tab/chat-detail/{{users.userpageid}}">
+        <img ng-src="img/default.jpg" ng-if="$index % 2 === 0">
+        <img ng-src="img/default1.jpg" ng-if="$index % 2 !== 0">
+        <h2>{{users.Name}}</h2>
+        <p>{{users.pagename}}</p>
+        <p>{{users.location}}</p>
+    </ion-item>
+    <ion-item  ng-if="userData === false" class="item-remove-animate item-avatar item-icon-right" type="item-text-wrap">
+        <p>No data available</p>
+    </ion-item>
+</ion-list>
+    </ion-content>
 </ion-view>
+<ion-infinite-scroll on-infinite="loadMore()" distance="5%"></ion-infinite-scroll>

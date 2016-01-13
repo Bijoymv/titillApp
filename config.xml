@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <widget id="com.ionicframework.app313671" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-  <name>Titill</name>
+  <name>Titill Pets &#38; You</name>
   <description>
     Find everything you wanted to know about dogs Pets, Vets, Pet Stores, Pet Clubs,
     Pet Breeders, Pet Beauty Centers, Pet Owners, Vacation Homes, Day Care Centers, Pet Events,
     India, pet care,pet nutrition,pet health problems,pet health questions,pet questions,sick pets
     </description>
   <author email="info@titill.com" href="http://titill.com//">
-      Titill
+      Titill Pets &#38; You
     </author>
   <content src="index.html"/>
   <access origin="*"/>
@@ -18,6 +18,9 @@
   <preference name="BackupWebStorage" value="none"/>
   <preference name="SplashScreen" value="screen"/>
   <preference name="SplashScreenDelay" value="3000"/>
+    <feature name="Geolocation">
+        <param name="ios-package" value="CDVLocation" />
+    </feature>
   <feature name="StatusBar">
     <param name="ios-package" value="CDVStatusBar" onload="true"/>
   </feature>

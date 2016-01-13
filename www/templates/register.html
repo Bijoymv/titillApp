@@ -1,0 +1,27 @@
+<ion-view view-title="Titill SIGN UP">
+    <ion-content padding="true">
+        <div class="list">
+            <p>SIGN UP</p>
+            <label class="item item-input">
+                <input type="text" ng-model="data.email"  placeholder="Email">
+            </label>
+            <label class="item item-input">
+                <input type="text" ng-model="data.password"  placeholder="Password">
+            </label>
+            <label class="item item-input">
+                <input type="text" ng-model="data.cnfPassword"  placeholder="Confirm Password">
+            </label>
+            <label class="item item-input">
+                <input type="text" ng-model="data.dob"  placeholder="DOB">
+            </label>
+            <label class="item item-input">
+                <input type="text" ng-model="data.type"  placeholder="User Type">
+            </label>
+        </div>
+        <p>I agree with the <a>terms & conditions</a> </p>
+        <div class="padding">
+            <button class="button button-block button-assertive" ng-click="getPwd()">Submit</button>
+        </div>
+
+    </ion-content>
+</ion-view>

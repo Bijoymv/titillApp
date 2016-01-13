@@ -9,3 +9,10 @@
     margin:5px;
 }
 
+.loading-container .loading {
+    background-color: #ef473a;
+    color: #fff;
+}
+
+a {text-decoration: none;}
+

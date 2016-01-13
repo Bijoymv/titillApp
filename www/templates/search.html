@@ -1,0 +1,22 @@
+<ion-view view-title="Listing">
+<ion-content ng-controller="SearchCtrl">
+    <ion-list>
+        <ion-item ng-if="userData === true" class="item-remove-animate item-avatar item-icon-right" ng-repeat="item in items" type="item-text-wrap" href="#/tab/search-detail/{{item.userid}}/{{item.usertypeid}}">
+                    <img ng-src="img/default.jpg" ng-if="$index % 2 === 0" >
+                    <img ng-src="img/default1.jpg" ng-if="$index % 2 !== 0">
+                    <h2>{{item.Name}}</h2>
+                    <p>{{item.pagename}}</p>
+                    <p>{{item.location}}</p>
+        </ion-item>
+    </ion-list>
+    <ion-item  ng-if="userData === false" class="item-remove-animate item-avatar item-icon-right" type="item-text-wrap">
+        <p>No data available</p>
+    </ion-item>
+    <ion-infinite-scroll
+            ng-if="!moredata"
+            distance="2%"
+            icon="ion-loading-c"
+            on-infinite="loadMore()">
+    </ion-infinite-scroll>
+</ion-content>
+</ion-view>
