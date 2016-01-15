@@ -1,7 +1,7 @@
 angular.module('starter.controllers', [])
 
 
-.controller('SignInCtrl', function($scope, $rootScope, LoginService, $ionicPopup, $state, $ionicLoading, LocalStorage, geoLocation, geoLocationService, $cordovaGeolocation) {
+.controller('SignInCtrl', function($http, $scope, $rootScope, LoginService, $ionicPopup, $state, $ionicLoading, LocalStorage, geoLocation, geoLocationService, $cordovaGeolocation) {
     $scope.data = {};
     LocalStorage.removeItem('userTypes');
    // $state.go('tab.dash');
@@ -29,65 +29,153 @@ angular.module('starter.controllers', [])
 
 
 
-        ionic.Platform.ready(function(){
+        ionic.Platform.ready(function() {
             $ionicLoading.show({
                 template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location!'
             });
 
             var posOptions = {
-                enableHighAccuracy: false,
-                timeout: 20000,
-                maximumAge: 0
+                maximumAge: 3000, timeout: 5000, enableHighAccuracy: true
             };
             $cordovaGeolocation.getCurrentPosition(posOptions).then(function (position) {
-                var lat  = position.coords.latitude;
+                var lat = position.coords.latitude;
                 var long = position.coords.longitude;
-                console.log("cordovaGeolocatiosssn",lat);
-                console.log("cordovaGeolocationdd long",long);
                 $ionicLoading.hide();
+                console.log(lat,long);
+            /*    var BASE_URL = "http://maps.googleapis.com/maps/api/geocode/json?sensor=true&";
+                var url = BASE_URL + "latlng="+lat+","+long+"&key=AIzaSyAoVMZ_NA31Lio44mlHR9lIKsBWvi2I8-0";*/
 
-            }, function(err) {
-                $ionicLoading.hide();
-                $rootScope.cityNameGeo = "Bangalore";
-                console.log("Geolocation errosssssr",err);
+
+           /*     $http.get(url)
+                    .success(function (response)
+                    {
+                        console.log(response);
+                        $ionicLoading.hide();
+                        var responseData = response;
+                        if (responseData.status == "OK") {
+                            $ionicLoading.hide();
+                            if (responseData.results[0]) {
+                                var add = results[0].formatted_address;
+                                var value = add.split(",");
+                                var count = value.length;
+                                var country = value[count - 1];
+                                var state = value[count - 2];
+                                var city = value[count - 3];
+                                $ionicLoading.hide();
+                                var alertPopup = $ionicPopup.alert({
+                                    title: 'Success',
+                                    template: 'city name is:' + city,
+                                    buttons: [
+                                        {
+                                            text: '<b>OK</b>' + city,
+                                            type: 'button-assertive'
+                                        }
+                                    ]
+                                });
+                            }
+
+                            else {
+                                console.log(response);
+                                $ionicLoading.hide();
+                                var alertPopup = $ionicPopup.alert({
+                                    title: 'Error',
+                                    template: 'address not found',
+                                    buttons: [
+                                        {
+                                            text: '<b>OK</b>',
+                                            type: 'button-assertive'
+                                        }
+                                    ]
+                                });
+                            }
+
+                        }
+                        else {
+                            console.log(response.status);
+                            $ionicLoading.hide();
+                            var alertPopup = $ionicPopup.alert({
+                                title: 'Error',
+                                template: 'Geocoder failed due to:' + response.status,
+                                buttons: [
+                                    {
+                                        text: '<b>OK</b>',
+                                        type: 'button-assertive'
+                                    }
+                                ]
+                            });
+                        }
+                    })
+                    .error(function(data) {
+                        $ionicLoading.hide();
+                        console.log(data);
+                    });*/
+
+
+
+               /* geoLocationService.getCity(lat, long).success(function (data) {
+                    var responseData = data;
+                    if (responseData.status == "OK") {
+                        if (responseData.results[0]) {
+                            var add = results[0].formatted_address;
+                            var value = add.split(",");
+                            var count = value.length;
+                            var country = value[count - 1];
+                            var state = value[count - 2];
+                            var city = value[count - 3];
+                            $ionicLoading.hide();
+                            var alertPopup = $ionicPopup.alert({
+                                title: 'Success',
+                                template: 'city name is:' + city,
+                                buttons: [
+                                    {
+                                        text: '<b>OK</b>' + city,
+                                        type: 'button-assertive'
+                                    }
+                                ]
+                            });
+                        }
+
+                        else {
+                            $ionicLoading.hide();
+                            var alertPopup = $ionicPopup.alert({
+                                title: 'Error',
+                                template: 'address not found',
+                                buttons: [
+                                    {
+                                        text: '<b>OK</b>',
+                                        type: 'button-assertive'
+                                    }
+                                ]
+                            });
+                        }
+
+                    }
+                    else {
+                        $ionicLoading.hide();
+                        var alertPopup = $ionicPopup.alert({
+                            title: 'Error',
+                            template: 'Geocoder failed due to:' + status,
+                            buttons: [
+                                {
+                                    text: '<b>OK</b>',
+                                    type: 'button-assertive'
+                                }
+                            ]
+                        });
+                    }
+
+                    console.log("cordovaGeolocatiosssn", lat);
+                    console.log("cordovaGeolocationdd long", long);
+
+
+                }, function (err) {
+                    $ionicLoading.hide();
+                    $rootScope.cityNameGeo = "Bangalore";
+                    console.log("Geolocation errosssssr", err);
+                });*/
             });
         });
 
-
-
-            //x.innerHTML="Latitude: " + position.coords.latitude + "<br>Longitude: " + position.coords.longitude;
-          /*  var geocodingAPI = "https://maps.googleapis.com/maps/api/geocode/json?sensor=true&latlng="+position.coords.latitude+","+position.coords.longitude+"&key=AIzaSyAoVMZ_NA31Lio44mlHR9lIKsBWvi2I8-0";
-            $.getJSON(geocodingAPI, function (json) {
-                if (json.status == "OK") {
-                    var result = json.results[0];
-                    var city = "";
-                    var state = "";
-                    for (var i = 0, len = result.address_components.length; i < len; i++) {
-                        var ac = result.address_components[i];
-                        if (ac.types.indexOf("administrative_area_level_1") >= 0) state = ac.long_name;
-                        if (ac.types.indexOf("administrative_area_level_2") >= 0) city = ac.long_name;
-                    }
-                    if (state != '') {
-                        console.log("You are in " + city + ", " + state + "!");
-                        if(city == "bengaluru" || city == "Bengaluru" || city == "Bangalore Urban" || city == "bangalore urban"){
-                            $('#tag_location, #tag_geoloc').val('Bangalore');
-                        }else if($('#tag_location').val() == ""){ $('#tag_location, #tag_geoloc').val(city); }else{ }
-                    }
-                }else{
-                }
-
-            });*/
-        //};
-
-/*if(LocalStorage.getObject('cityDetails') !== undefined){
- console.log("cityDetails",LocalStorage.getObject('cityDetails'));
-} else{
-    getCities();
-}*/
-
-   /* if (loginDetails.username !== undefined) {
-        $state.go('tab.dash');
-    }*/
     $scope.login = function () {
             $ionicLoading.show({
                 template: 'loading..',
@@ -124,6 +212,7 @@ angular.module('starter.controllers', [])
                 }
 
             }).error(function (data) {
+                $state.go('tab.dash');
                 $ionicLoading.hide();
                 var alertPopup = $ionicPopup.alert({
                     title: 'Login failed!',
@@ -354,14 +443,7 @@ angular.module('starter.controllers', [])
                 });
         };
 
-        var getUserImage = function() {
-            console.log("Inside getUserImage");
-            SearchService.getSearchImage($stateParams).success(function (data) {
-                var userList = [];
-                console.log("getUserImage",data);
-            }).error(function (data) {
-            });
-        };
+
 
 
 
@@ -371,6 +453,22 @@ angular.module('starter.controllers', [])
 
 .controller('SearchDetailCtrl', function($scope, $stateParams, SearchService, $ionicLoading) {
         console.log("getSearchDetails is called");
+
+        var getUserImage = function() {
+            console.log("Inside getUserImage");
+            $scope.image =  "img/default.jpg";
+            SearchService.getSearchImage($stateParams.userId).success(function (data) {
+                if(data.data.usermedia[0].data!== null) {
+                   $scope.image =  "http://demo.titill.com/"+data.data.usermedia[0].data[0].mediapath;
+                }
+                console.log("getUserImage",data);
+            }).error(function (data) {
+                console.log("getUserImage error",data);
+            });
+        };
+
+        getUserImage();
+
         var getSearchList = function() {
             console.log("Inside getSearchList");
             $ionicLoading.show({
@@ -391,6 +489,9 @@ angular.module('starter.controllers', [])
             });
         };
         getSearchList();
+
+
+
     })
 
 .controller('ChatsCtrl', function($scope, $stateParams, Chats) {

@@ -14,21 +14,22 @@
         <div class="list card">
 
             <div class="item item-avatar">
-                <img src="img/default.jpg">
+                <img src="{{image}}">
                 <h2>{{searchDetails.page_business_name}}</h2>
                 <p> {{searchDetails.page_contact_address}}</p>
             </div>
 
             <div class="item item-body">
-                <img class="full-image detailImg" src="img/default.jpg">
+                <img class="full-image detailImg" src="{{image}}" height="50%">
                 <p>
                   {{searchDetails.page_business_desc}}
                 </p>
                 <p>
-                    {{searchDetails.page_website}}
-                </p>
-                <p>
-                    {{searchDetails.page_email}}
+                <ul>
+                <li class="">&nbsp;&nbsp;{{searchDetails.page_website}}</li>
+                <li class="">&nbsp;&nbsp;{{searchDetails.page_email}}</li>
+                <li class="ion-android-call">&nbsp;&nbsp;{{searchDetails.page_cellphone}}</li>
+                </ul>
                 </p>
                 <p>
                     <a href="#" class="subdued">1 Like</a>
