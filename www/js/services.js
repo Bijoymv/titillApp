@@ -89,35 +89,7 @@ angular.module('starter.services', [])
                 headers: headers
             };
 
-            $http(req).then(function (response) {
-                deferred.resolve(response);
-            }, function (error) {
-                deferred.reject(error);
-            });
-
-            promise.success = function(fn) {
-                promise.then(fn);
-                return promise;
-            };
-            promise.error = function(fn) {
-                promise.then(null, fn);
-                return promise;
-            };
-            return promise;
-        }/*,
-        getUserType: function() {
-            var deferred = $q.defer();
-            var promise = deferred.promise;
-
-            var headers = {
-                'Content-Type': 'application/json'
-            };
-
-            var req = {
-                method: 'GET',
-                url: 'http://demo.titill.com/mobileapi/titillusertype',
-                headers: headers
-            };
+            console.log("Inside LoginService getCities::::",req.url);
 
             $http(req).then(function (response) {
                 deferred.resolve(response);
@@ -134,42 +106,8 @@ angular.module('starter.services', [])
                 return promise;
             };
             return promise;
-        }*//*,
-        getUserList: function(params) {
-            var deferred = $q.defer();
-            var promise = deferred.promise;
+        }
 
-            var headers = {
-                'Content-Type': 'application/json'
-            };
-
-            var limitUp = params.countUp;
-            var limitDown = params.countDown;
-
-            var req = {
-                method: 'GET',
-                url: 'http://demo.titill.com/mobileapi/search/'+params.cityId+'/'+params.typeCode+'/'+limitDown+'/'+limitUp+'/',
-                headers: headers
-            };
-
-            console.log(req.url);
-
-            $http(req).then(function (response) {
-                deferred.resolve(response);
-            }, function (error) {
-                deferred.reject(error);
-            });
-
-            promise.success = function(fn) {
-                promise.then(fn);
-                return promise;
-            };
-            promise.error = function(fn) {
-                promise.then(null, fn);
-                return promise;
-            };
-            return promise;
-        }*/
     }
 })
 
@@ -235,7 +173,7 @@ angular.module('starter.services', [])
                 headers: headers
             };
 
-            console.log(req.url);
+            console.log("Inside UserService ::: getUserType--",req.url);
 
             $http(req).then(function (response) {
                 deferred.resolve(response);
@@ -347,6 +285,39 @@ console.log("getNewUsers inside",url);
             };
 
             var url = BASE_URL+'userdetailsmedia/'+userId;
+
+            var req = {
+                method: 'GET',
+                url: url,
+                headers: headers
+            };
+
+            console.log(req.url);
+
+            $http(req).then(function (response) {
+                deferred.resolve(response);
+            }, function (error) {
+                deferred.reject(error);
+            });
+
+            promise.success = function(fn) {
+                promise.then(fn);
+                return promise;
+            };
+            promise.error = function(fn) {
+                promise.then(null, fn);
+                return promise;
+            };
+            return promise;
+        },
+        getViews: function(userId){
+            var deferred = $q.defer();
+            var promise = deferred.promise;
+            var headers = {
+                'Content-Type': 'application/json'
+            };
+
+            var url = BASE_URL+'views/'+userId;
 
             var req = {
                 method: 'GET',
