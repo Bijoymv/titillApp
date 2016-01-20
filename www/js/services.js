@@ -1,6 +1,5 @@
 angular.module('starter.services', [])
 
-
 .factory('LoginService', function($http,$q) {
     return {
         loginUser: function(name, pw) {
@@ -18,7 +17,7 @@ angular.module('starter.services', [])
 
             var req = {
                 method: 'POST',
-                url: 'http://demo.titill.com/mobileapi/login',
+                url: 'http://titill.com/mobileapi/login',
                 headers: headers,
                 data: postData
             };
@@ -54,7 +53,7 @@ angular.module('starter.services', [])
 
             var req = {
                 method: 'POST',
-                url: 'http://demo.titill.com/mobileapi/forgotpassword',
+                url: 'http://titill.com/mobileapi/forgotpassword',
                 headers: headers,
                 data: postData
             };
@@ -85,7 +84,7 @@ angular.module('starter.services', [])
 
             var req = {
                 method: 'GET',
-                url: 'http://demo.titill.com/mobileapi/geocities',
+                url: 'http://titill.com/mobileapi/geocities',
                 headers: headers
             };
 
@@ -113,7 +112,6 @@ angular.module('starter.services', [])
 
 .factory('geoLocationService', function($http, $q){
         var BASE_URL = "https://maps.googleapis.com/maps/api/geocode/json?sensor=true&";
-
         return {
             getCity: function(lat,long) {
                 var deferred = $q.defer();
@@ -154,8 +152,7 @@ angular.module('starter.services', [])
     })
 
 .factory('UserService', function($http, $q){
-    var BASE_URL = "http://demo.titill.com/mobileapi/";
-
+    var BASE_URL = "http://titill.com/mobileapi/";
     return {
         getUserType: function() {
             var deferred = $q.defer();
@@ -196,9 +193,8 @@ angular.module('starter.services', [])
 })
 
 .factory('SearchService', function($http, $q){
-    var BASE_URL = "http://demo.titill.com/mobileapi/";
+    var BASE_URL = "http://titill.com/mobileapi/";
     var items = [];
-
     return {
         getUserList: function(params,count){
             var deferred = $q.defer();
@@ -343,7 +339,6 @@ console.log("getNewUsers inside",url);
             };
             return promise;
         }
-
     }
 })
 
@@ -383,53 +378,4 @@ console.log("getNewUsers inside",url);
             $window.localStorage.removeItem(key);
         }
     }
-}])
-
-.factory('Chats', function() {
-  // Might use a resource here that returns a JSON array
-
-  // Some fake testing data
-  var chats = [{
-    id: 0,
-    name: 'Ben Sparrow',
-    lastText: 'You on your way?',
-    face: 'img/ben.png'
-  }, {
-    id: 1,
-    name: 'Max Lynx',
-    lastText: 'Hey, it\'s me',
-    face: 'img/max.png'
-  }, {
-    id: 2,
-    name: 'Adam Bradleyson',
-    lastText: 'I should buy a boat',
-    face: 'img/adam.jpg'
-  }, {
-    id: 3,
-    name: 'Perry Governor',
-    lastText: 'Look at my mukluks!',
-    face: 'img/perry.png'
-  }, {
-    id: 4,
-    name: 'Mike Harrington',
-    lastText: 'This is wicked good ice cream.',
-    face: 'img/mike.png'
-  }];
-
-  return {
-    all: function() {
-      return chats;
-    },
-    remove: function(chat) {
-      chats.splice(chats.indexOf(chat), 1);
-    },
-    get: function(chatId) {
-      for (var i = 0; i < chats.length; i++) {
-        if (chats[i].id === parseInt(chatId)) {
-          return chats[i];
-        }
-      }
-      return null;
-    }
-  };
-});
+}]);

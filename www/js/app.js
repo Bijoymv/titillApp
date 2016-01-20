@@ -39,7 +39,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','n
   .state('forgotpassword', {
       url: '/forgot-password',
       templateUrl: 'templates/forgot-password.html',
-      controller: 'SignInCtrl'
+      controller: 'PWdRecoveryCtrl'
   })
   .state('signup', {
       url: '/sign-up',
@@ -69,7 +69,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','n
   .state('tab.search', {
       url: '/search/:cityId/:typeCode',
       views: {
-          'tab-chats': {
+          'tab-search': {
               templateUrl: 'templates/search.html',
               controller: 'SearchCtrl'
           }
@@ -79,31 +79,12 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','n
   .state('tab.search-detail', {
       url: '/search-detail/:userId/:userTypeId',
       views: {
-          'tab-chats': {
+          'tab-search': {
               templateUrl: 'templates/search-detail.html',
               controller: 'SearchDetailCtrl'
           }
       }
   })
-
-  .state('tab.chats', {
-      url: '/chats',
-      views: {
-        'tab-chats': {
-          templateUrl: 'templates/tab-chats.html',
-          controller: 'ChatsCtrl'
-        }
-      }
-    })
-    .state('tab.chat-detail', {
-      url: '/chats/:chatId',
-      views: {
-        'tab-chats': {
-          templateUrl: 'templates/chat-detail.html',
-          controller: 'ChatDetailCtrl'
-        }
-      }
-    })
 
   .state('tab.account', {
     url: '/account',

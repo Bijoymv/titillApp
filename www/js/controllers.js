@@ -1,6 +1,5 @@
 angular.module('starter.controllers', [])
 
-
 .controller('SignInCtrl', function($http, $scope, $rootScope, LoginService, $ionicPopup, $state, $ionicLoading, LocalStorage, geoLocation, geoLocationService, $cordovaGeolocation) {
     $scope.data = {};
     LocalStorage.removeItem('userTypes');
@@ -8,7 +7,6 @@ angular.module('starter.controllers', [])
             $ionicLoading.show({
                 template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location!'
             });
-
             var posOptions = {
                 maximumAge: 3000, timeout: 5000, enableHighAccuracy: true
             };
@@ -31,9 +29,6 @@ angular.module('starter.controllers', [])
                     ]
                 });
             });
-
-
-
             var loginDetails = LocalStorage.getObject('loginDetails');
             if(loginDetails.username){
                 console.log("Reached SignInCtrl",loginDetails.username);
@@ -41,7 +36,6 @@ angular.module('starter.controllers', [])
             } else{
                 console.log("Reached SignInCtrl & nothing saved in local Storage");
             }
-
         });
 
     $scope.login = function () {
@@ -95,13 +89,17 @@ angular.module('starter.controllers', [])
             });
     };
 
-    $scope.getPwd = function() {
-         $ionicLoading.show({
-             template: 'loading..',
-             animation: 'fade-in',
-             noBackdrop: false
-         });
-            LoginService.getUserPwd($scope.data.email).success(function(data) {
+})
+
+.controller('PWdRecoveryCtrl', function($http, $scope, $rootScope, LoginService, $ionicPopup, $state, $ionicLoading) {
+
+        $scope.getPwd = function(val) {
+            $ionicLoading.show({
+                template: 'loading..',
+                animation: 'fade-in',
+                noBackdrop: false
+            });
+            LoginService.getUserPwd(val).success(function(data) {
                 var responseData = data.data;
                 $ionicLoading.hide();
                 if(responseData.Error){
@@ -147,7 +145,7 @@ angular.module('starter.controllers', [])
         }
 
 
-})
+    })
 
 .controller('DashCtrl', function($scope, UserService, $ionicPopup, $state, $ionicLoading, LocalStorage, $rootScope, LoginService) {
 
@@ -248,7 +246,7 @@ angular.module('starter.controllers', [])
         }
 })
 
-.controller('SearchCtrl', function($scope, SearchService, $stateParams, Chats, $ionicPopup, $state, $ionicLoading, LocalStorage) {
+.controller('SearchCtrl', function($scope, SearchService, $stateParams, $ionicPopup, $state, $ionicLoading, LocalStorage) {
         // With the new view caching in Ionic, Controllers are only called
         // when they are recreated or on app start, instead of every page change.
         // To lisiten for when this page is active (for example, to refresh data),
@@ -269,7 +267,6 @@ angular.module('starter.controllers', [])
                 animation: 'fade-in',
                 noBackdrop: false
             });
-
             SearchService.getUserList($stateParams,count).success(function (data) {
                 var userList = [];
                 console.log("getUserList",data);
@@ -288,22 +285,18 @@ angular.module('starter.controllers', [])
             }).error(function (data) {
                 $scope.userData = false;
                 $ionicLoading.hide();
-              /*  var alertPopup = $ionicPopup.alert({
-                    title: 'Data not available!',
-                    template: 'Please check your internet Connection!',
-                    buttons: [
-                        {
-                            text: '<b>OK</b>',
-                            type: 'button-assertive'
-                        }
-                    ]
-                });*/
+
             });
         };
 
         getUserList();
 
         $scope.loadMore = function() {
+            $ionicLoading.show({
+                template: 'loading..',
+                animation: 'fade-in',
+                noBackdrop: false
+            });
             $scope.moredata = false;
                 console.log("InsideloadMore");
                 count.lowerLimit = count.upperLimit;
@@ -311,6 +304,7 @@ angular.module('starter.controllers', [])
 
                 SearchService.getNewUsers($stateParams,count).then(function(items){
                     console.log("getNewUsers is called");
+                    $ionicLoading.hide();
                     var userList = [];
                     if (items.data["Search Result"] && items.data["Search Result"][0]) {
                         userList = items.data["Search Result"][0].data;
@@ -334,27 +328,19 @@ angular.module('starter.controllers', [])
                 });
         };
 
-
-
-
-
-
     })
 
-
 .controller('SearchDetailCtrl', function($scope, $stateParams, SearchService, $ionicLoading) {
-        console.log("getSearchDetails is called");
-
         var getUserImage = function() {
-            console.log("Inside getUserImage");
-            $scope.image =  "img/default.jpg";
             SearchService.getSearchImage($stateParams.userId).success(function (data) {
                 if(data.data.usermedia[0].data!== null) {
-                   $scope.image =  "http://demo.titill.com/"+data.data.usermedia[0].data[0].mediapath;
+                   $scope.image =  "http://titill.com/"+data.data.usermedia[0].data[0].mediapath;
+                } else{
+                   $scope.image =  "img/default.jpg";
                 }
-               // console.log("getUserImage",data);
             }).error(function (data) {
                 console.log("getUserImage error",data);
+                $scope.image =  "img/default.jpg";
             });
         };
 
@@ -412,25 +398,6 @@ angular.module('starter.controllers', [])
 
 
     })
-
-.controller('ChatsCtrl', function($scope, $stateParams, Chats) {
-  // With the new view caching in Ionic, Controllers are only called
-  // when they are recreated or on app start, instead of every page change.
-  // To listen for when this page is active (for example, to refresh data),
-  // listen for the $ionicView.enter event:
-  //
-  //$scope.$on('$ionicView.enter', function(e) {
-  //});
-
-  $scope.chats = Chats.all();
-  $scope.remove = function(chat) {
-    Chats.remove(chat);
-  };
-})
-
-.controller('ChatDetailCtrl', function($scope, $stateParams, Chats) {
-  $scope.chat = Chats.get($stateParams.chatId);
-})
 
 .controller('AccountCtrl', function($scope) {
   $scope.settings = {
