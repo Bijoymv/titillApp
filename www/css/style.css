@@ -16,5 +16,35 @@
 
 a {text-decoration: none;}
 
+.rating {
+    float: right;
+    font-size: 14px;
+    font-weight: 900;
+    padding: 13px;
+    color: #F93237;
+    background: url(../img/rating_48.png) no-repeat center center;
+}
+
+.phoneCall {
+    float: left;
+}
+
+.emailClass {
+    padding-right:30%;
+    float: left;
+}
+
+.pageViews{
+    float: left;
+    width: 100%;
+    margin-bottom: 0px !important;
+    margin-top: 0px !important;
+}
+
+.marginTop {
+    margin-top: 16px !important;
+}
+
+
 
 

@@ -7,14 +7,65 @@ angular.module('starter.controllers', [])
             $ionicLoading.show({
                 template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location!'
             });
+
+            var getCities = function (){
+                LoginService.getCities().success(function (data) {
+                    var cityNames = new Array();
+                    if (data.data.city_names[0].data) {
+                        for(var i=0; i< data.data.city_names[0].data.length; i++){
+                            cityNames[data.data.city_names[0].data[i].name]=data.data.city_names[0].data[i].id;
+                        }
+                    }
+                    $rootScope.cityNames = cityNames;
+                    console.log("CityNames:::",$rootScope.cityNames);
+                }).error(function (data) {
+                    console.log("error in fetching city names",data);
+                    $rootScope.cityNames = [];
+                });
+            };
+
+            if(!$rootScope.cityNames){
+                getCities();
+            }
+
             var posOptions = {
                 maximumAge: 3000, timeout: 5000, enableHighAccuracy: true
             };
             $cordovaGeolocation.getCurrentPosition(posOptions).then(function (position) {
                 var lat = position.coords.latitude;
                 var long = position.coords.longitude;
-                $ionicLoading.hide();
-                console.log(lat,long);
+                console.log("positions",lat,long);
+                geoLocationService.getCity(lat,long).success(function (json) {
+                    console.log("getCity success",json);
+                    $rootScope.geoCityName = null;
+                    if (json.data.status == "OK") {
+                        var result = json.data.results[0];
+                        var city = "";
+                        var state = "";
+                        for (var i = 0, len = result.address_components.length; i < len; i++) {
+                            var ac = result.address_components[i];
+                            if (ac.types.indexOf("administrative_area_level_1") >= 0) state = ac.long_name;
+                            if (ac.types.indexOf("administrative_area_level_2") >= 0) city = ac.long_name;
+                        }
+                        if (state !== '') {
+                            console.log("You are in " + city + ", " + state + "!");
+                            $rootScope.geoCityName = city;
+                            if(city == "bengaluru" || city == "Bengaluru" || city == "Bangalore Urban" || city == "bangalore urban") {
+                                console.log("Bangalore");
+                                $rootScope.geoCityName = "Bangalore";
+                            }
+                        }
+
+                    }else{
+                        console.log("Error in getting the city name");
+                    }
+
+                    $ionicLoading.hide();
+                }).error(function (data) {
+                    console.log("getCity error",data);
+                    $ionicLoading.hide();
+                });
+
             }, function(err) {
                 // error
                 $ionicLoading.hide();
@@ -29,6 +80,7 @@ angular.module('starter.controllers', [])
                     ]
                 });
             });
+
             var loginDetails = LocalStorage.getObject('loginDetails');
             if(loginDetails.username){
                 console.log("Reached SignInCtrl",loginDetails.username);
@@ -147,12 +199,21 @@ angular.module('starter.controllers', [])
 
     })
 
-.controller('DashCtrl', function($scope, UserService, $ionicPopup, $state, $ionicLoading, LocalStorage, $rootScope, LoginService) {
+.controller('DashCtrl', function($scope, UserService, $ionicPopup, $state, $ionicLoading, LocalStorage, $rootScope) {
 
         $scope.userType = null;
         $scope.images = null;
-        $scope.cityId = 483;
-        console.log("Reached DashCtrl",LocalStorage);
+        $scope.cityName = $rootScope.geoCityName;
+        if($rootScope.cityNames){
+            if($rootScope.geoCityName!== null){
+                $scope.cityId = parseInt($rootScope.cityNames[$rootScope.geoCityName]);
+                console.log("Reached DashCtrl $scope.cityId loop::::::",$scope.cityId);
+            } else {
+                $scope.cityId = 232; // Bangalore ID
+            }
+        } else{
+            $scope.cityId = 232; // Bangalore ID
+        }
        var getUserType = function() {
             $ionicLoading.show({
                 template: 'loading..',
@@ -209,8 +270,6 @@ angular.module('starter.controllers', [])
             });
         };
 
-        //getUserType();
-
         var userTypes = LocalStorage.getObject('userTypes');
         if (userTypes.userType === undefined) {
             getUserType();
@@ -218,35 +277,17 @@ angular.module('starter.controllers', [])
             $scope.userType = userTypes.userType;
         }
 
-
-        $scope.getListing = function(city_id,type_id){
+        $scope.getListing = function(city_id,type_id,type_name){
+            $rootScope.selectedTypeName = type_name;
+            $rootScope.selectedTypeId = type_id;
+            console.log("selectedTypeName::",type_name);
             var params = {cityId:city_id,typeCode:type_id};
             $state.go("tab.search",params);
         };
 
-
-
-        var getCities = function (){
-            LoginService.getCities().success(function (data) {
-                var cityNames = new Array();
-                if (data.data.city_names[0].data) {
-                    for(var i=0; i< data.data.city_names[0].data.length; i++){
-                        cityNames[data.data.city_names[0].data[i].name]=data.data.city_names[0].data[i].id;
-                    }
-                }
-                $rootScope.cityNames = cityNames;
-            }).error(function (data) {
-                console.log("error in fetching city names",data);
-                $rootScope.cityNames = [];
-            });
-        };
-
-        if(!$rootScope.cityNames || !$rootScope.cityNames.length > 0){
-            getCities();
-        }
 })
 
-.controller('SearchCtrl', function($scope, SearchService, $stateParams, $ionicPopup, $state, $ionicLoading, LocalStorage) {
+.controller('SearchCtrl', function($scope, SearchService, $stateParams, $ionicPopup, $state, $ionicLoading, $rootScope) {
         // With the new view caching in Ionic, Controllers are only called
         // when they are recreated or on app start, instead of every page change.
         // To lisiten for when this page is active (for example, to refresh data),
@@ -256,7 +297,8 @@ angular.module('starter.controllers', [])
         //});
 
 
-
+        $scope.cityName = $rootScope.geoCityName;
+        $scope.typeNameSel =  $rootScope.selectedTypeName;
         $scope.items = [];
         var count = {upperLimit:50, lowerLimit:0};
 
@@ -328,19 +370,27 @@ angular.module('starter.controllers', [])
                 });
         };
 
+        $scope.search = function () {
+         console.log("search is called");
+        };
     })
 
 .controller('SearchDetailCtrl', function($scope, $stateParams, SearchService, $ionicLoading) {
         var getUserImage = function() {
+            var baseURL = "http://demo.titill.com/";
             SearchService.getSearchImage($stateParams.userId).success(function (data) {
-                if(data.data.usermedia[0].data!== null) {
-                   $scope.image =  "http://titill.com/"+data.data.usermedia[0].data[0].mediapath;
+                if(data.data.usermedia[0] && data.data.usermedia[0].data && data.data.usermedia[0].data!== null) {
+                    if(data.data.usermedia[0].data[1] && data.data.usermedia[0].data[1].mediapath){
+                        $scope.bannerImage =  baseURL+data.data.usermedia[0].data[1].mediapath;
+                    }else{
+                        $scope.bannerImage =  "img/bannerimage-default.jpg";
+                    }
                 } else{
-                   $scope.image =  "img/default.jpg";
+                   $scope.bannerImage =  "img/bannerimage-default.jpg";
                 }
             }).error(function (data) {
                 console.log("getUserImage error",data);
-                $scope.image =  "img/default.jpg";
+                $scope.bannerImage =  "img/bannerimage-default.jpg";
             });
         };
 
@@ -378,8 +428,8 @@ angular.module('starter.controllers', [])
 
             SearchService.getViews($stateParams.userId).success(function (data) {
                 //console.log("getViews",data.pageview.data.length);
-                if(data.pageview && data.pageview.data && data.pageview.data.length){
-                    $scope.pageViews = data.pageview.data.length;
+                if(data.data && data.data.pageview[0] && data.data.pageview[0].data && data.data.pageview[0].data.length > 0){
+                    $scope.pageViews = data.data.pageview[0].data.length;
                 } else{
                     $scope.pageViews = 0;
                 }
@@ -395,6 +445,100 @@ angular.module('starter.controllers', [])
         };
 
         getViews();
+
+
+        var getLikes = function() {
+            console.log("Inside getLikes");
+            $ionicLoading.show({
+                template: 'loading..',
+                animation: 'fade-in',
+                noBackdrop: false
+            });
+
+            SearchService.getLikes($stateParams.userId).success(function (data) {
+                //console.log("getViews",data.pageview.data.length);
+                if(data.data && data.data.pagelike[0] && data.data.pagelike[0].data && data.data.pagelike[0].data.length > 0){
+                    $scope.pageLikes = data.data.pagelike[0].data.length;
+                } else{
+                    $scope.pageLikes = 0;
+                }
+
+                $ionicLoading.hide();
+
+            }).error(function (data) {
+
+                $scope.pageLikes = 0;
+                console.log("pageLikes not  available",data);
+                $ionicLoading.hide();
+            });
+        };
+
+        getLikes();
+
+
+        var getRating = function() {
+            console.log("Inside pageRate");
+            $ionicLoading.show({
+                template: 'loading..',
+                animation: 'fade-in',
+                noBackdrop: false
+            });
+
+            SearchService.getRating($stateParams.userId).success(function (data) {
+                var totalRating = 0, ratingLength, number;
+                if(data.data && data.data.pagerating[0] && data.data.pagerating[0].data && data.data.pagerating[0].data.length > 0){
+                   ratingLength = data.data.pagerating[0].data.length;
+                    if(ratingLength > 1){
+                        for(var i=0; i<=ratingLength-1; i++){
+                            totalRating = totalRating + parseFloat(data.data.pagerating[0].data[i].rate_count);
+                        }
+                    }
+                    number = totalRating / ratingLength;
+                    $scope.pageRate = number.toFixed(1);
+
+                } else{
+                    $scope.pageRate = 0;
+                }
+
+                $ionicLoading.hide();
+
+            }).error(function (data) {
+
+                $scope.pageRate = 0;
+                console.log("pageRate not  available",data);
+                $ionicLoading.hide();
+            });
+        };
+
+        getRating();
+
+
+        var getFollowers = function() {
+            console.log("Inside Followers");
+            $ionicLoading.show({
+                template: 'loading..',
+                animation: 'fade-in',
+                noBackdrop: false
+            });
+
+            SearchService.getFollowers($stateParams.userId).success(function (data) {
+                if(data.data && data.data.pagefollowers[0] && data.data.pagefollowers[0].data && data.data.pagefollowers[0].data.length > 0){
+                    $scope.pagefollower = data.data.pagefollowers[0].data.length;
+                } else{
+                    $scope.pagefollower = 0;
+                }
+
+                $ionicLoading.hide();
+
+            }).error(function (data) {
+
+                $scope.pagefollower = 0;
+                console.log("pageRate not  available",data);
+                $ionicLoading.hide();
+            });
+        };
+
+        getFollowers();
 
 
     })

@@ -9,28 +9,23 @@
 
         <div class="list card">
 
-            <div class="item item-avatar">
-                <img src="{{image}}">
-                <h2>{{searchDetails.page_user_name}}</h2>
-                <p> {{searchDetails.page_business_name}}</p>
-                <p> {{searchDetails.page_contact_address}}</p>
+            <div class="item">
+                <span class="rating">{{pageRate}}</span>
+                <h2>{{searchDetails.page_business_name}}</h2>
+                <p> {{searchDetails.page_loc_area}}</p>
             </div>
 
             <div class="item item-body">
-                <img class="full-image detailImg" src="{{image}}" height="50%">
-                <p>
-                  {{searchDetails.page_business_desc}}
-                </p>
-                <p>
-                <ul>
-                <li class="">&nbsp;&nbsp;{{searchDetails.page_website}}</li>
-                <li class="">&nbsp;&nbsp;{{searchDetails.page_email}}</li>
-                <li class="ion-android-call">&nbsp;&nbsp;{{searchDetails.page_cellphone}}</li>
-                </ul>
-                </p>
-                <p>
-                    <a href="#" class="subdued">{{pageViews}} Views</a>
-                    <a href="#" class="subdued">5 Likes</a>
+                <img class="full-image detailImg" src="{{bannerImage}}">
+                <p ng-class="{'marginTop':searchDetails.page_contact_address !== '','pageViews':true}">{{searchDetails.page_contact_address}}</p>
+                <p ng-class="{'marginTop':searchDetails.page_business_desc !== '','pageViews':true}">{{searchDetails.page_business_desc}}</p>
+                <p ng-class="{'marginTop':searchDetails.page_website !== '','pageViews':true}"><span ng-class="{'ion-android-globe':searchDetails.page_website !== ''}">&nbsp;&nbsp;{{searchDetails.page_website}}</span></p>
+                <p ng-class="{'marginTop':searchDetails.page_email !== '','pageViews':true}"><span ng-class="{'ion-email-unread':searchDetails.page_email !== ''}">&nbsp;&nbsp;{{searchDetails.page_email}}</span></p>
+                <p ng-class="{'marginTop':searchDetails.page_cellphone !== '' || searchDetails.page_landline!== '','pageViews':true}"><span ng-class="{ 'ion-android-call': searchDetails.page_cellphone !== '' || searchDetails.page_landline !== ''}">&nbsp;&nbsp;{{searchDetails.page_cellphone}} &nbsp;&nbsp;{{searchDetails.page_landline}}</span></p>
+                <p class="pageViews marginTop">
+                   <span class="subdued"> {{pageViews}} Views</span>
+                   <span class="subdued"> &nbsp;&nbsp;{{pageLikes}} Likes</span>
+                   <span class="subdued"> &nbsp;&nbsp;{{pagefollower}} Followers</span>
                 </p>
             </div>
 

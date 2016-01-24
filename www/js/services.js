@@ -17,7 +17,7 @@ angular.module('starter.services', [])
 
             var req = {
                 method: 'POST',
-                url: 'http://titill.com/mobileapi/login',
+                url: 'http://demo.titill.com/mobileapi/login',
                 headers: headers,
                 data: postData
             };
@@ -53,7 +53,7 @@ angular.module('starter.services', [])
 
             var req = {
                 method: 'POST',
-                url: 'http://titill.com/mobileapi/forgotpassword',
+                url: 'http://demo.titill.com/mobileapi/forgotpassword',
                 headers: headers,
                 data: postData
             };
@@ -84,7 +84,7 @@ angular.module('starter.services', [])
 
             var req = {
                 method: 'GET',
-                url: 'http://titill.com/mobileapi/geocities',
+                url: 'http://demo.titill.com/mobileapi/geocities',
                 headers: headers
             };
 
@@ -152,7 +152,7 @@ angular.module('starter.services', [])
     })
 
 .factory('UserService', function($http, $q){
-    var BASE_URL = "http://titill.com/mobileapi/";
+    var BASE_URL = "http://demo.titill.com/mobileapi/";
     return {
         getUserType: function() {
             var deferred = $q.defer();
@@ -193,7 +193,7 @@ angular.module('starter.services', [])
 })
 
 .factory('SearchService', function($http, $q){
-    var BASE_URL = "http://titill.com/mobileapi/";
+    var BASE_URL = "http://demo.titill.com/mobileapi/";
     var items = [];
     return {
         getUserList: function(params,count){
@@ -314,6 +314,105 @@ console.log("getNewUsers inside",url);
             };
 
             var url = BASE_URL+'views/'+userId;
+
+            var req = {
+                method: 'GET',
+                url: url,
+                headers: headers
+            };
+
+            console.log(req.url);
+
+            $http(req).then(function (response) {
+                deferred.resolve(response);
+            }, function (error) {
+                deferred.reject(error);
+            });
+
+            promise.success = function(fn) {
+                promise.then(fn);
+                return promise;
+            };
+            promise.error = function(fn) {
+                promise.then(null, fn);
+                return promise;
+            };
+            return promise;
+        },
+        getLikes: function(userId){
+            var deferred = $q.defer();
+            var promise = deferred.promise;
+            var headers = {
+                'Content-Type': 'application/json'
+            };
+
+            var url = BASE_URL+'likes/'+userId;
+
+            var req = {
+                method: 'GET',
+                url: url,
+                headers: headers
+            };
+
+            console.log(req.url);
+
+            $http(req).then(function (response) {
+                deferred.resolve(response);
+            }, function (error) {
+                deferred.reject(error);
+            });
+
+            promise.success = function(fn) {
+                promise.then(fn);
+                return promise;
+            };
+            promise.error = function(fn) {
+                promise.then(null, fn);
+                return promise;
+            };
+            return promise;
+        },
+        getFollowers: function(userId){
+            var deferred = $q.defer();
+            var promise = deferred.promise;
+            var headers = {
+                'Content-Type': 'application/json'
+            };
+
+            var url = BASE_URL+'followers/'+userId;
+
+            var req = {
+                method: 'GET',
+                url: url,
+                headers: headers
+            };
+
+            console.log(req.url);
+
+            $http(req).then(function (response) {
+                deferred.resolve(response);
+            }, function (error) {
+                deferred.reject(error);
+            });
+
+            promise.success = function(fn) {
+                promise.then(fn);
+                return promise;
+            };
+            promise.error = function(fn) {
+                promise.then(null, fn);
+                return promise;
+            };
+            return promise;
+        },
+        getRating: function(userId){
+            var deferred = $q.defer();
+            var promise = deferred.promise;
+            var headers = {
+                'Content-Type': 'application/json'
+            };
+
+            var url = BASE_URL+'rating/'+userId;
 
             var req = {
                 method: 'GET',
