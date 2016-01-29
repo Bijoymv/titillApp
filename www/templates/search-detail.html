@@ -17,20 +17,45 @@
 
             <div class="item item-body">
                 <img class="full-image detailImg" src="{{bannerImage}}">
-                <p ng-class="{'marginTop':searchDetails.page_contact_address !== '','pageViews':true}">{{searchDetails.page_contact_address}}</p>
-                <p ng-class="{'marginTop':searchDetails.page_business_desc !== '','pageViews':true}">{{searchDetails.page_business_desc}}</p>
-                <p ng-class="{'marginTop':searchDetails.page_website !== '','pageViews':true}"><span ng-class="{'ion-android-globe':searchDetails.page_website !== ''}">&nbsp;&nbsp;{{searchDetails.page_website}}</span></p>
-                <p ng-class="{'marginTop':searchDetails.page_email !== '','pageViews':true}"><span ng-class="{'ion-email-unread':searchDetails.page_email !== ''}">&nbsp;&nbsp;{{searchDetails.page_email}}</span></p>
-                <p ng-class="{'marginTop':searchDetails.page_cellphone !== '' || searchDetails.page_landline!== '','pageViews':true}"><span ng-class="{ 'ion-android-call': searchDetails.page_cellphone !== '' || searchDetails.page_landline !== ''}">&nbsp;&nbsp;{{searchDetails.page_cellphone}} &nbsp;&nbsp;{{searchDetails.page_landline}}</span></p>
-                <p class="pageViews marginTop">
-                   <span class="subdued"> {{pageViews}} Views</span>
-                   <span class="subdued"> &nbsp;&nbsp;{{pageLikes}} Likes</span>
-                   <span class="subdued"> &nbsp;&nbsp;{{pagefollower}} Followers</span>
+
+                <div class="card" ng-class="{'hide':searchDetails.page_contact_address === '' && searchDetails.page_website ==='' && searchDetails.page_email ===''}">
+                    <div class="item item-text-wrap" ng-class="{'hide':searchDetails.page_contact_address === ''}">
+                        {{searchDetails.page_contact_address}}
+                    </div>
+                    <div class="item item-text-wrap" ng-class="{'hide':searchDetails.page_website === ''}">
+                        Website : {{searchDetails.page_website}}
+                    </div>
+                    <div class="item item-text-wrap" ng-class="{'hide':searchDetails.page_email === ''}">
+                        Email : {{searchDetails.page_email}}
+                    </div>
+                </div>
+                <div class="item item-button-right callItem" ng-class="{'hide':searchDetails.page_contact_address === '','pageViews':true}">
+                    Navigate
+
+                        <button class="button button-assertive" ng-click="navigate();">
+                            <i class="icon ion-arrow-right-c"></i>
+                        </button>
+
+                </div>
+
+                <div class="item item-button-right callItem" ng-class="{'hide':searchDetails.page_cellphone === '','pageViews':true}">
+                    Call Me
+                    <button class="button button-assertive" ng-click="callPhone(searchDetails.page_cellphone);">
+                        <i class="icon ion-ios-telephone"></i>
+                    </button>
+                </div>
+
+                <p ng-class="{'marginClass':searchDetails.page_business_desc !== '','pageViews':true}">{{searchDetails.page_business_desc}}</p>
+
+                <p class="pageViews marginClass">
+                    <a href="#" class="subdued">{{pageLikes}} Like</a>
+                    <a href="#" class="subdued"> {{pagefollower}} Followers</a>
+                    <a href="#" class="subdued">  {{pageViews}} Views</a>
                 </p>
+
             </div>
 
         </div>
-
 
     </ion-content>
 </ion-view>

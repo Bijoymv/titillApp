@@ -147,6 +147,41 @@ angular.module('starter.services', [])
                 };
                 return promise;
 
+            },
+            getDirection: function(addr) {
+                var deferred = $q.defer();
+                var promise = deferred.promise;
+
+                var headers = {
+                    'Content-Type': 'application/json'
+                };
+
+                var url = BASE_URL + "address="+addr+"&key=AIzaSyAoVMZ_NA31Lio44mlHR9lIKsBWvi2I8-0";
+
+                var req = {
+                    method: 'GET',
+                    url: url,
+                    headers: headers
+                };
+
+                console.log(req.url);
+
+                $http(req).then(function (response) {
+                    deferred.resolve(response);
+                }, function (error) {
+                    deferred.reject(error);
+                });
+
+                promise.success = function(fn) {
+                    promise.then(fn);
+                    return promise;
+                };
+                promise.error = function(fn) {
+                    promise.then(null, fn);
+                    return promise;
+                };
+                return promise;
+
             }
         }
     })
@@ -193,6 +228,7 @@ angular.module('starter.services', [])
 })
 
 .factory('SearchService', function($http, $q){
+   console.log("Reached SearchService");
     var BASE_URL = "http://demo.titill.com/mobileapi/";
     var items = [];
     return {

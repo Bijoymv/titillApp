@@ -20,17 +20,17 @@
     <div class="row list dashList" padding="true" ng-repeat="usrType in userType" ng-if="$index % 3 === 0">
 
       <div class="col col-33 " ng-if="$index < userType.length">
-          <img src="{{userType[$index].img}}" width="40%" ng-click="getListing(cityId,userType[$index].type_code,userType[$index].name)"/>
-          <p>{{userType[$index].name}}</p>
+          <img src="{{userType[$index].img}}" width="40%" ng-click="getListing(userType[$index].type_code,userType[$index].name)"/>
+          <p><a ng-click="getListing(userType[$index].type_code,userType[$index].name)">{{userType[$index].name}}</a></p>
       </div>
 
       <div class="col col-33 " ng-if="$index + 1 < userType.length">
-          <img src="{{userType[$index + 1].img}}" width="40%" ng-click="getListing(cityId,userType[$index+1].type_code,userType[$index+1].name)"/>
-          <p>{{userType[$index + 1].name}}</p>
+          <img src="{{userType[$index + 1].img}}" width="40%" ng-click="getListing(userType[$index+1].type_code,userType[$index+1].name)"/>
+          <p><a ng-click="getListing(userType[$index+1].type_code,userType[$index+1].name)">{{userType[$index + 1].name}}</a></p>
       </div>
       <div class="col col-33 " ng-if="$index + 2 < userType.length">
-          <img src="{{userType[$index + 2].img}}" width="40%" ng-click="getListing(cityId,userType[$index+2].type_code,userType[$index+2].name)"/>
-          <p>{{userType[$index + 2].name}}</p>
+          <img src="{{userType[$index + 2].img}}" width="40%" ng-click="getListing(userType[$index+2].type_code,userType[$index+2].name)"/>
+          <p><a ng-click="getListing(userType[$index+2].type_code,userType[$index+2].name)">{{userType[$index + 2].name}}</a></p>
       </div>
     </div>
   </ion-content>

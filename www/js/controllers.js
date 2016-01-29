@@ -34,6 +34,8 @@ angular.module('starter.controllers', [])
             $cordovaGeolocation.getCurrentPosition(posOptions).then(function (position) {
                 var lat = position.coords.latitude;
                 var long = position.coords.longitude;
+                $rootScope.lat = lat;
+                $rootScope.long = long;
                 console.log("positions",lat,long);
                 geoLocationService.getCity(lat,long).success(function (json) {
                     console.log("getCity success",json);
@@ -68,10 +70,12 @@ angular.module('starter.controllers', [])
 
             }, function(err) {
                 // error
+                $rootScope.lat = 12.8679411;
+                $rootScope.long = 77.7670821;
                 $ionicLoading.hide();
                 var alertPopup = $ionicPopup.alert({
                     title: 'Not able to get the current location!',
-                    template: 'Please allow location',
+                    template: 'Please check internet connection or allow location',
                     buttons: [
                         {
                             text: '<b>OK</b>',
@@ -207,6 +211,7 @@ angular.module('starter.controllers', [])
         if($rootScope.cityNames){
             if($rootScope.geoCityName!== null){
                 $scope.cityId = parseInt($rootScope.cityNames[$rootScope.geoCityName]);
+                //$scope.cityId = 483;
                 console.log("Reached DashCtrl $scope.cityId loop::::::",$scope.cityId);
             } else {
                 $scope.cityId = 232; // Bangalore ID
@@ -214,6 +219,8 @@ angular.module('starter.controllers', [])
         } else{
             $scope.cityId = 232; // Bangalore ID
         }
+        $rootScope.cityId =  $scope.cityId;
+
        var getUserType = function() {
             $ionicLoading.show({
                 template: 'loading..',
@@ -277,11 +284,11 @@ angular.module('starter.controllers', [])
             $scope.userType = userTypes.userType;
         }
 
-        $scope.getListing = function(city_id,type_id,type_name){
+        $scope.getListing = function(type_id,type_name){
             $rootScope.selectedTypeName = type_name;
             $rootScope.selectedTypeId = type_id;
-            console.log("selectedTypeName::",type_name);
-            var params = {cityId:city_id,typeCode:type_id};
+            console.log("inside getListing ::::selectedTypeName::",type_name);
+            var params = {typeCode:type_id};
             $state.go("tab.search",params);
         };
 
@@ -296,11 +303,21 @@ angular.module('starter.controllers', [])
         //$scope.$on('$ionicView.enter', function(e) {
         //});
 
-
+        console.log("Reached search controller");
         $scope.cityName = $rootScope.geoCityName;
         $scope.typeNameSel =  $rootScope.selectedTypeName;
+        $scope.cityId =  $rootScope.cityId;
+        $scope.typeCode =  $stateParams.typeCode;
         $scope.items = [];
-        var count = {upperLimit:50, lowerLimit:0};
+        var count = {upperLimit:5, lowerLimit:0};
+
+        //default scenario
+        if(!$stateParams.typeCode){
+                $scope.typeCode = 'pca';
+                $scope.typeNameSel = 'Pet Care';
+        }
+
+
 
         var getUserList = function() {
             console.log("Inside getUserList");
@@ -309,7 +326,8 @@ angular.module('starter.controllers', [])
                 animation: 'fade-in',
                 noBackdrop: false
             });
-            SearchService.getUserList($stateParams,count).success(function (data) {
+            var params = {cityId:$scope.cityId,typeCode:$scope.typeCode};
+            SearchService.getUserList(params,count).success(function (data) {
                 var userList = [];
                 console.log("getUserList",data);
                 if (data.data["Search Result"] && data.data["Search Result"][0]) {
@@ -341,10 +359,11 @@ angular.module('starter.controllers', [])
             });
             $scope.moredata = false;
                 console.log("InsideloadMore");
+                var params = {cityId:$scope.cityId,typeCode:$scope.typeCode};
                 count.lowerLimit = count.upperLimit;
-                count.upperLimit = count.upperLimit + 40;
+                count.upperLimit = count.upperLimit + 5;
 
-                SearchService.getNewUsers($stateParams,count).then(function(items){
+                SearchService.getNewUsers(params,count).then(function(items){
                     console.log("getNewUsers is called");
                     $ionicLoading.hide();
                     var userList = [];
@@ -370,12 +389,9 @@ angular.module('starter.controllers', [])
                 });
         };
 
-        $scope.search = function () {
-         console.log("search is called");
-        };
     })
 
-.controller('SearchDetailCtrl', function($scope, $stateParams, SearchService, $ionicLoading) {
+.controller('SearchDetailCtrl', function($scope, $stateParams, SearchService, $ionicLoading, $state, geoLocationService, $rootScope) {
         var getUserImage = function() {
             var baseURL = "http://demo.titill.com/";
             SearchService.getSearchImage($stateParams.userId).success(function (data) {
@@ -540,12 +556,116 @@ angular.module('starter.controllers', [])
 
         getFollowers();
 
+        var onSuccessCall = function(){console.log("call is successfull");}
+        var onErrorCall = function(){console.log("call got an error");}
 
+        $scope.callPhone = function(number){
+            window.plugins.CallNumber.callNumber(onSuccessCall, onErrorCall, number, true);
+        };
+
+
+
+        $scope.navigate = function(){
+            console.log("inside navigate");
+
+            var getDirection = function(){
+                $rootScope.directionLat = null;
+                $rootScope.directionLong = null;
+                if($scope.searchDetails.page_loc_area !== ''){
+                    var addr = $scope.searchDetails.page_loc_area;
+                    addr = addr.replace(/,/g, '+');
+                    addr = addr.replace(/ /g, '');
+                    addr = addr+"+"+$rootScope.geoCityName;
+                    geoLocationService.getDirection(addr).success(function (json) {
+                        console.log("Direction success",json);
+
+                        if (json.data.status == "OK") {
+                            var lat = json.data.results[0].geometry.location.lat;
+                            var long = json.data.results[0].geometry.location.lng;
+
+                            $rootScope.directionLat = lat;
+                            $rootScope.directionLong = long;
+
+                            console.log(" $rootScope.directionLat", lat, $rootScope.directionLat);
+                            console.log(" $rootScope.directionLong", long, $rootScope.directionLong);
+                            $state.go("map");
+
+                        }else{
+                            console.log("Error in getting the direction");
+                        }
+
+                    }).error(function (data) {
+                        console.log("Error error direction",data);
+                    });
+                } else{
+                   console.log("No destination to go")
+                }
+
+
+            };
+            getDirection();
+
+        };
     })
 
 .controller('AccountCtrl', function($scope) {
-  $scope.settings = {
-    enableFriends: true
-  };
+        $scope.settings = {
+            enableFriends: true
+        };
+    })
 
+.directive('map', function() {
+    return {
+        restrict: 'A',
+        link:function(scope, element, attrs){
+
+            var zValue = scope.$eval(attrs.zoom);
+            var lat = scope.$eval(attrs.lat);
+            var lng = scope.$eval(attrs.lng);
+            var directionLong = scope.$eval(attrs.dirlo);
+            var directionLat = scope.$eval(attrs.dirla);
+
+            console.log("directionLong", directionLong);
+            console.log("directionLat", directionLat);
+
+            var myLatlng = new google.maps.LatLng(lat,lng),
+                mapOptions = {
+                    zoom: zValue,
+                    center: myLatlng
+                },
+                map = new google.maps.Map(element[0],mapOptions);
+
+
+            var directionsService = new google.maps.DirectionsService();
+            var directionsDisplay = new google.maps.DirectionsRenderer();
+
+            var myLocation = new google.maps.LatLng(lat,lng);
+
+            var destination = new google.maps.LatLng(directionLat, directionLong);
+
+
+            var request = {
+                origin : myLocation,
+                destination : destination,
+                travelMode : google.maps.TravelMode.DRIVING
+            };
+            directionsService.route(request, function(response, status) {
+                if (status == google.maps.DirectionsStatus.OK) {
+                    directionsDisplay.setDirections(response);
+                }
+            });
+
+            directionsDisplay.setMap(map);
+
+        }
+    };
+})
+
+.controller('MapCtrl', function($scope,$rootScope) {
+        $scope.lat = $rootScope.lat;
+        $scope.long = $rootScope.long;
+        $scope.directionLong = $rootScope.directionLong;
+        $scope.directionLat = $rootScope.directionLat;
+        console.log("in map controller $scope.directionLong",$scope.directionLong);
+        console.log("in map controller $scope.directionLat",$scope.directionLat);
 });

@@ -36,11 +36,20 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','n
       templateUrl: 'templates/sign-in.html',
       controller: 'SignInCtrl'
   })
+
   .state('forgotpassword', {
       url: '/forgot-password',
       templateUrl: 'templates/forgot-password.html',
       controller: 'PWdRecoveryCtrl'
   })
+
+  .state('map', {
+      url: '/map',
+      cache: false,
+      templateUrl: 'templates/map.html',
+      controller: 'MapCtrl'
+  })
+
   .state('signup', {
       url: '/sign-up',
       templateUrl: 'templates/register.html',
@@ -67,7 +76,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','n
   })
 
   .state('tab.search', {
-      url: '/search/:cityId/:typeCode',
+      url: '/search/:typeCode',
       views: {
           'tab-search': {
               templateUrl: 'templates/search.html',
@@ -75,6 +84,17 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','n
           }
       }
   })
+
+  .state('tab.searchDefault', {
+      url: '/searchDefault',
+      views: {
+          'tab-search': {
+              templateUrl: 'templates/search.html',
+              controller: 'SearchCtrl'
+          }
+      }
+  })
+
 
   .state('tab.search-detail', {
       url: '/search-detail/:userId/:userTypeId',

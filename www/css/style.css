@@ -25,6 +25,10 @@ a {text-decoration: none;}
     background: url(../img/rating_48.png) no-repeat center center;
 }
 
+.callItem {
+    border-width:0px !important;
+}
+
 .phoneCall {
     float: left;
 }
@@ -39,12 +43,24 @@ a {text-decoration: none;}
     width: 100%;
     margin-bottom: 0px !important;
     margin-top: 0px !important;
+    font-size: 16px !important;
 }
 
-.marginTop {
-    margin-top: 16px !important;
+.marginClass {
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+}
+.show {
+    display:block;
+}
+.hide {
+    display:none;
 }
 
-
-
+#map{
+    width: 90%;
+    height: 600px;
+    margin: 60px auto;
+    box-shadow: 0 3px 25px black;
+}
 
