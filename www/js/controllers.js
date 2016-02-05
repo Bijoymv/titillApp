@@ -1,12 +1,10 @@
 angular.module('starter.controllers', [])
 
-.controller('SignInCtrl', function($http, $scope, $rootScope, LoginService, $ionicPopup, $state, $ionicLoading, LocalStorage, geoLocation, geoLocationService, $cordovaGeolocation) {
+.controller('SignInCtrl', function($http, $scope, $rootScope,$ionicHistory, LoginService, $ionicPopup, $state, $ionicLoading, LocalStorage, geoLocation, geoLocationService, $cordovaGeolocation) {
     $scope.data = {};
-    LocalStorage.removeItem('userTypes');
+
+    console.log("Entered the sign in controller");
     ionic.Platform.ready(function() {
-            $ionicLoading.show({
-                template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location!'
-            });
 
             var getCities = function (){
                 LoginService.getCities().success(function (data) {
@@ -28,17 +26,29 @@ angular.module('starter.controllers', [])
                 getCities();
             }
 
+        var getGeoCity = function() {
+
+            console.log("Inside getGeoCity");
+            $ionicLoading.show({
+                template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location!'
+            });
             var posOptions = {
                 maximumAge: 3000, timeout: 5000, enableHighAccuracy: true
             };
+            //default City
+            $rootScope.geoCityName = "Chennai";
+            // error, default latitude and longitude for chennai
+            $rootScope.lat = 13.0524;
+            $rootScope.long = 80.2508;
+
             $cordovaGeolocation.getCurrentPosition(posOptions).then(function (position) {
                 var lat = position.coords.latitude;
                 var long = position.coords.longitude;
                 $rootScope.lat = lat;
                 $rootScope.long = long;
-                console.log("positions",lat,long);
-                geoLocationService.getCity(lat,long).success(function (json) {
-                    console.log("getCity success",json);
+                console.log("positions", lat, long);
+                geoLocationService.getCity(lat, long).success(function (json) {
+                    console.log("getCity success", json);
                     $rootScope.geoCityName = null;
                     if (json.data.status == "OK") {
                         var result = json.data.results[0];
@@ -52,26 +62,29 @@ angular.module('starter.controllers', [])
                         if (state !== '') {
                             console.log("You are in " + city + ", " + state + "!");
                             $rootScope.geoCityName = city;
-                            if(city == "bengaluru" || city == "Bengaluru" || city == "Bangalore Urban" || city == "bangalore urban") {
+                            if (city == "bengaluru" || city == "Bengaluru" || city == "Bangalore Urban" || city == "bangalore urban") {
                                 console.log("Bangalore");
                                 $rootScope.geoCityName = "Bangalore";
                             }
                         }
 
-                    }else{
+                        LocalStorage.setObject('geoCity', {
+                            geoCityName: $rootScope.geoCityName,
+                            lat: $rootScope.lat,
+                            long: $rootScope.long
+                        });
+
+                    } else {
                         console.log("Error in getting the city name");
                     }
 
                     $ionicLoading.hide();
                 }).error(function (data) {
-                    console.log("getCity error",data);
+                    console.log("getCity error", data);
                     $ionicLoading.hide();
                 });
 
-            }, function(err) {
-                // error
-                $rootScope.lat = 12.8679411;
-                $rootScope.long = 77.7670821;
+            }, function (err) {
                 $ionicLoading.hide();
                 var alertPopup = $ionicPopup.alert({
                     title: 'Not able to get the current location!',
@@ -84,10 +97,26 @@ angular.module('starter.controllers', [])
                     ]
                 });
             });
+        };
+
+        var cityDetails = LocalStorage.getObject('geoCity');
+        if(cityDetails.geoCityName){
+            console.log("----- geoCityName",cityDetails.geoCityName);
+            $rootScope.lat = cityDetails.lat;
+            $rootScope.long = cityDetails.long;
+            $rootScope.geoCityName = cityDetails.geoCityName;
+        } else {
+
+            getGeoCity();
+            console.log("----Reached geoCityName & nothing saved in local Storage");
+        }
 
             var loginDetails = LocalStorage.getObject('loginDetails');
             if(loginDetails.username){
                 console.log("Reached SignInCtrl",loginDetails.username);
+                $ionicHistory.nextViewOptions({
+                    disableBack: true
+                });
                 $state.go('tab.dash');
             } else{
                 console.log("Reached SignInCtrl & nothing saved in local Storage");
@@ -111,11 +140,17 @@ angular.module('starter.controllers', [])
                         userid: data.Login.data.userid
                     });
 
+                    $ionicHistory.nextViewOptions({
+                        disableBack: true
+                    });
                     $state.go('tab.dash');
                 }
 
                 if (data.data.Error) {
                     console.log("Inside ERROR message",data.data.Error[0]);
+                    $ionicHistory.nextViewOptions({
+                        disableBack: true
+                    });
                     $state.go('tab.dash');
                     var alertPopup = $ionicPopup.alert({
                         title: 'Login failed!',
@@ -130,6 +165,9 @@ angular.module('starter.controllers', [])
                 }
 
             }).error(function (data) {
+                $ionicHistory.nextViewOptions({
+                    disableBack: true
+                });
                 $state.go('tab.dash');
                 $ionicLoading.hide();
                 var alertPopup = $ionicPopup.alert({
@@ -147,7 +185,7 @@ angular.module('starter.controllers', [])
 
 })
 
-.controller('PWdRecoveryCtrl', function($http, $scope, $rootScope, LoginService, $ionicPopup, $state, $ionicLoading) {
+.controller('PWdRecoveryCtrl', function($http, $scope, $rootScope, LoginService, $ionicPopup, $state, $ionicLoading, $ionicHistory) {
 
         $scope.getPwd = function(val) {
             $ionicLoading.show({
@@ -184,6 +222,9 @@ angular.module('starter.controllers', [])
 
                 }
 
+                $ionicHistory.nextViewOptions({
+                    disableBack: true
+                });
                 $state.go('signin');
             }).error(function(data) {
                 $ionicLoading.hide();
@@ -208,16 +249,17 @@ angular.module('starter.controllers', [])
         $scope.userType = null;
         $scope.images = null;
         $scope.cityName = $rootScope.geoCityName;
+        console.log("Dash ---",$rootScope.geoCityName);
         if($rootScope.cityNames){
             if($rootScope.geoCityName!== null){
                 $scope.cityId = parseInt($rootScope.cityNames[$rootScope.geoCityName]);
-                //$scope.cityId = 483;
+                //$scope.cityId = 232; //Bangalore ID
                 console.log("Reached DashCtrl $scope.cityId loop::::::",$scope.cityId);
             } else {
-                $scope.cityId = 232; // Bangalore ID
+                $scope.cityId = 483; // Chennai ID
             }
         } else{
-            $scope.cityId = 232; // Bangalore ID
+            $scope.cityId = 483; // Chennai ID
         }
         $rootScope.cityId =  $scope.cityId;
 
@@ -309,15 +351,37 @@ angular.module('starter.controllers', [])
         $scope.cityId =  $rootScope.cityId;
         $scope.typeCode =  $stateParams.typeCode;
         $scope.items = [];
-        var count = {upperLimit:5, lowerLimit:0};
+        $scope.searchVal = $rootScope.cityNames;
+
+        console.log("city names available::::",$rootScope.cityNames);
+        var count = {upperLimit:10, lowerLimit:0};
+        var cityArray = [];
+        Object.keys($rootScope.cityNames).forEach(function(key,index) {
+            // key: the name of the object key
+            // index: the ordinal position of the key within the object
+            console.log("city",key);
+            console.log("city value",$rootScope.cityNames[key]);
+
+            cityArray.push({id: $rootScope.cityNames[key], text: key, checked: false, icon: null});
+        });
+
+        // for select box directive
+        $scope.countries = cityArray;
+        console.log( $scope.countries);
+       /* $scope.countries = [
+            {id: $scope.cityId, text: $scope.cityName, checked: true, icon: null},
+            {id: 2, text: 'France', checked: false, icon: null},
+            {id : 3, text: 'Japan', checked: false, icon: null}];*/
+
+        $scope.countries_text_single = 'Choose different city';
+        $scope.countries_text_multiple = 'Choose countries';
+        $scope.val =  {single: null, multiple: null};
 
         //default scenario
         if(!$stateParams.typeCode){
                 $scope.typeCode = 'pca';
                 $scope.typeNameSel = 'Pet Care';
         }
-
-
 
         var getUserList = function() {
             console.log("Inside getUserList");
@@ -396,8 +460,10 @@ angular.module('starter.controllers', [])
             var baseURL = "http://demo.titill.com/";
             SearchService.getSearchImage($stateParams.userId).success(function (data) {
                 if(data.data.usermedia[0] && data.data.usermedia[0].data && data.data.usermedia[0].data!== null) {
-                    if(data.data.usermedia[0].data[1] && data.data.usermedia[0].data[1].mediapath){
-                        $scope.bannerImage =  baseURL+data.data.usermedia[0].data[1].mediapath;
+                    var len = data.data.usermedia[0].data.length;
+                    var val = data.data.usermedia[0].data[len -1];
+                    if(val && val.category ==='cover' && val.default ==='1' && val.mediapath){
+                        $scope.bannerImage =  baseURL+val.mediapath;
                     }else{
                         $scope.bannerImage =  "img/bannerimage-default.jpg";
                     }
@@ -588,6 +654,7 @@ angular.module('starter.controllers', [])
 
                             console.log(" $rootScope.directionLat", lat, $rootScope.directionLat);
                             console.log(" $rootScope.directionLong", long, $rootScope.directionLong);
+
                             $state.go("map");
 
                         }else{
@@ -661,6 +728,114 @@ angular.module('starter.controllers', [])
     };
 })
 
+.directive('ionSearchBar', function($timeout, $q) {
+        return {
+            restrict: 'E',
+            replace: true,
+            scope: { search: '=?filter' },
+            link: function(scope, element, attrs) {
+                scope.placeholder = attrs.placeholder || '';
+                scope.search = {value: '', focus: false};
+                if (attrs.class) {
+                    element.addClass(attrs.class);
+                }
+
+                // We need the actual input field to detect focus and blur
+                var inputElement = element.find('input')[0];
+
+                var airlines = [
+                    {"name":"Lao Central Airlines ","id":1},
+                    {"id":2,"name":"TAG"},
+                    {"id":3,"name":"Air Baltic"},
+                    {"name":"Dana Airlines","id":4}
+                ];
+
+                airlines = airlines.sort(function(a, b) {
+
+                    var airlineA = a.name.toLowerCase();
+                    var airlineB = b.name.toLowerCase();
+
+                    if(airlineA > airlineB) return 1;
+                    if(airlineA < airlineB) return -1;
+                    return 0;
+                });
+
+                var searchAirlines = function(searchFilter) {
+
+                    console.log('Searching airlines for ' + searchFilter);
+
+                    var deferred = $q.defer();
+
+                    var matches = airlines.filter( function(airline) {
+                        if(airline.name.toLowerCase().indexOf(searchFilter.toLowerCase()) !== -1 ) return true;
+                    })
+
+                    $timeout( function(){
+
+                        deferred.resolve( matches );
+
+                    }, 100);
+
+                    return deferred.promise;
+
+                };
+
+
+
+
+
+
+                // This function is triggered when the user presses the `Cancel` button
+                scope.cancelSearch = function() {
+                    // Manually trigger blur
+                    inputElement.blur();
+                    scope.search.value = '';
+                };
+
+                scope.search = function(){
+                    scope.search = { "airlines" : [], "value" : '' };
+                    console.log(scope.search.value);
+                    searchAirlines(scope.search.value).then(
+
+                            function (matches) {
+                                scope.search.airlines = matches;
+                                console.log("Inside Search ",matches);
+                            }
+                        );
+
+
+                };
+
+                // When the user focuses the search bar
+                angular.element(inputElement).bind('focus', function () {
+                    // We store the focus status in the model to show/hide the Cancel button
+                    scope.search.focus = 1;
+                    // Add a class to indicate focus to the search bar and the content area
+                    element.addClass('search-bar-focused');
+                    angular.element(document.querySelector('.has-search-bar')).addClass('search-bar-focused');
+                    // We need to call `$digest()` because we manually changed the model
+                    scope.$digest();
+                });
+                // When the user leaves the search bar
+                angular.element(inputElement).bind('blur', function() {
+                    scope.search.focus = 0;
+                    element.removeClass('search-bar-focused');
+                    angular.element(document.querySelector('.has-search-bar')).removeClass('search-bar-focused');
+                });
+            },
+            template: '<div class="search-bar bar bar-header item-input-inset">' +
+                '<label class="item-input-wrapper">' +
+                '<i class="icon ion-ios-search placeholder-icon"></i>' +
+                '<input type="search" placeholder="" ng-model="search.value" data="" ng-change="search()">' +
+                '</label>' +
+                '<button class="button button-clear button-assertive" ng-show="search.focus" ng-click="cancelSearch()">' +
+                'Cancel' +
+                '</button>' +
+                '</div>'
+
+        };
+    })
+
 .controller('MapCtrl', function($scope,$rootScope) {
         $scope.lat = $rootScope.lat;
         $scope.long = $rootScope.long;
@@ -668,4 +843,173 @@ angular.module('starter.controllers', [])
         $scope.directionLat = $rootScope.directionLat;
         console.log("in map controller $scope.directionLong",$scope.directionLong);
         console.log("in map controller $scope.directionLat",$scope.directionLat);
-});
+})
+
+.controller('SignOutCtrl', function($scope, $rootScope, LocalStorage, $state, $ionicHistory) {
+        console.log("Entered in SignOutCtrl");
+
+        LocalStorage.removeItem('userTypes');
+        LocalStorage.removeItem('geoCity');
+
+        $ionicHistory.nextViewOptions({
+            disableBack: true
+        });
+        $state.go('signin');
+})
+
+.directive('fancySelect',
+    [
+        '$ionicModal',
+        function($ionicModal) {
+            return {
+                /* Only use as <fancy-select> tag */
+                restrict : 'E',
+
+                /* Our template */
+                templateUrl: 'fancy-select.html',
+
+                /* Attributes to set */
+                scope: {
+                    'items'        : '=', /* Items list is mandatory */
+                    'text'         : '=', /* Displayed text is mandatory */
+                    'value'        : '=', /* Selected value binding is mandatory */
+                    'typeNameSel'  : '=', /* Selected value binding is mandatory */
+                    'callback'     : '&'
+                },
+
+                link: function (scope, element, attrs) {
+
+                    /* Default values */
+                    scope.multiSelect   = attrs.multiSelect === 'true' ? true : false;
+                    scope.allowEmpty    = attrs.allowEmpty === 'false' ? false : true;
+
+                    /* Header used in ion-header-bar */
+                    scope.headerText    = attrs.headerText || '';
+
+                    /* Text displayed on label */
+                    // scope.text          = attrs.text || '';
+                    scope.defaultText   = scope.text || '';
+
+                    /* Notes in the right side of the label */
+                    scope.noteText      = attrs.noteText || '';
+                    scope.noteImg       = attrs.noteImg || '';
+                    scope.noteImgClass  = attrs.noteImgClass || '';
+
+                    /* Optionnal callback function */
+                    // scope.callback = attrs.callback || null;
+
+                    /* Instanciate ionic modal view and set params */
+
+                    /* Some additionnal notes here :
+                     *
+                     * In previous version of the directive,
+                     * we were using attrs.parentSelector
+                     * to open the modal box within a selector.
+                     *
+                     * This is handy in particular when opening
+                     * the "fancy select" from the right pane of
+                     * a side view.
+                     *
+                     * But the problem is that I had to edit ionic.bundle.js
+                     * and the modal component each time ionic team
+                     * make an update of the FW.
+                     *
+                     * Also, seems that animations do not work
+                     * anymore.
+                     *
+                     */
+
+
+
+                    $ionicModal.fromTemplateUrl(
+                        'fancy-select-items.html',
+                        {'scope': scope}
+                    ).then(function(modal) {
+                            scope.modal = modal;
+                        });
+
+                    /* Validate selection from header bar */
+                    scope.validate = function (event) {
+                        // Construct selected values and selected text
+                        if (scope.multiSelect == true) {
+
+                            // Clear values
+                            scope.value = '';
+                            scope.text = '';
+
+                            // Loop on items
+                            jQuery.each(scope.items, function (index, item) {
+                                if (item.checked) {
+                                    scope.value = scope.value + item.id+';';
+                                    scope.text = scope.text + item.text+', ';
+                                }
+                            });
+
+                            // Remove trailing comma
+                            scope.value = scope.value.substr(0,scope.value.length - 1);
+                            scope.text = scope.text.substr(0,scope.text.length - 2);
+                        }
+
+                        // Select first value if not nullable
+                        if (typeof scope.value == 'undefined' || scope.value == '' || scope.value == null ) {
+                            if (scope.allowEmpty == false) {
+                                scope.value = scope.items[0].id;
+                                scope.text = scope.items[0].text;
+
+                                // Check for multi select
+                                scope.items[0].checked = true;
+                            } else {
+                                scope.text = scope.defaultText;
+                            }
+                        }
+
+                        // Hide modal
+                        scope.hideItems();
+
+                        // Execute callback function
+                        if (typeof scope.callback == 'function') {
+                            scope.callback (scope.value);
+                        }
+                    };
+
+                    /* Show list */
+                    scope.showItems = function (event) {
+                        event.preventDefault();
+                        scope.modal.show();
+                    };
+
+                    /* Hide list */
+                    scope.hideItems = function () {
+                        scope.modal.hide();
+                    };
+
+                    /* Destroy modal */
+                    scope.$on('$destroy', function() {
+                        scope.modal.remove();
+                    });
+
+                    /* Validate single with data */
+                    scope.validateSingle = function (item) {
+
+                        // Set selected text
+                        scope.text = item.text;
+
+                        // Set selected value
+                        scope.value = item.id;
+
+                        // Hide items
+                        scope.hideItems();
+
+                        // Execute callback function
+                        if (typeof scope.callback == 'function') {
+                            scope.callback (scope.value);
+                        }
+                    }
+                }
+            };
+        }
+    ]
+);
+
+
+

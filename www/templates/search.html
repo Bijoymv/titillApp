@@ -1,5 +1,68 @@
-<ion-view view-title="{{typeNameSel}} in {{cityName}}">
-<ion-content ng-controller="SearchCtrl">
+<ion-view ng-controller="SearchCtrl"  view-title="{{typeNameSel}} in {{cityName}}">
+    <fancy-select
+            header-text="Select the cities"
+            allow-empty='false'
+            value="val.single"
+            text="countries_text_single"
+            items="countries">
+    </fancy-select>
+<ion-content class="has-header has-search-bar">
+
+    <script id="fancy-select.html" type="text/ng-template">
+        <div class="searchDiv">
+        <ion-list>
+            <ion-item class="item-text-wrap" ng-click="showItems($event)">
+                Choose another city
+                <span class="item-note">
+                  {{noteText}}
+                  <img class="{{noteImgClass}}" ng-if="noteImg != ''" src="{{noteImg}}" />
+                </span>
+            </ion-item>
+        </ion-list>
+       </div>
+    </script>
+    <script id="fancy-select-items.html" type="text/ng-template">
+        <ion-view class="fancy-select-items modal">
+            <ion-header-bar class="bar-assertive">
+
+                <button ng-click="hideItems()" class="button button-positive button-icon ion-ios7-arrow-back"></button>
+
+                <h1 class="title">{{headerText}}</h1>
+
+                <button ng-click="validate()" class="button button-positive button-icon ion-checkmark"></button>
+
+            </ion-header-bar>
+            <ion-content>
+                <div class="list">
+                    <!-- Multi select -->
+                    <ion-toggle
+                            ng-repeat="item in items"
+                            ng-if="multiSelect"
+                            ng-checked="item.checked"
+                            ng-model="item.checked"
+                            class="item item-text-wrap">
+                        <div class="fancy-select-icon" ng-if="item.icon != null">
+                            <img src="{{item.icon}}" />
+                        </div>
+                        {{item.text}}
+                    </ion-toggle>
+
+                    <!-- Single select -->
+                    <label
+                            ng-repeat="item in items"
+                            ng-if="!multiSelect"
+                            class="item item-text-wrap"
+                            ng-click='validateSingle(item)'>
+                        <div class="fancy-select-icon" ng-if="item.icon != null">
+                            <i class="icon-{{item.text}}" style="background-image: url({{item.icon}})"></i>
+                        </div>
+                        {{item.text}}
+                    </label>
+                </div>
+            </ion-content>
+        </ion-view>
+    </script>
+
     <ion-list>
         <ion-item ng-if="userData === true" class="item-remove-animate item-avatar item-icon-right" ng-repeat="item in items" type="item-text-wrap" href="#/tab/search-detail/{{item.userid}}/{{item.usertypeid}}">
                     <img ng-src="img/default.jpg">
@@ -7,9 +70,14 @@
                     <p>{{item.location}}</p>
         </ion-item>
     </ion-list>
-    <ion-item  ng-if="userData === false" class="item-remove-animate item-avatar item-icon-right" type="item-text-wrap">
-        <p>No data available</p>
-    </ion-item>
+
+    <div class="card" ng-if="userData === false" >
+        <div class="item item-text-wrap">
+            <img ng-src="img/saddog.png" /> <br/>
+            Oops..We found no data to show matching your location and will update this page soon.
+        </div>
+    </div>
+
     <ion-infinite-scroll
             ng-if="!moredata"
             distance="2%"

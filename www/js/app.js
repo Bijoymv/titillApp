@@ -33,12 +33,21 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','n
 
   .state('signin', {
       url: '/sign-in',
+      cache: false,
       templateUrl: 'templates/sign-in.html',
       controller: 'SignInCtrl'
   })
 
+  .state('signout', {
+      url: '/sign-out',
+      cache: false,
+      templateUrl: '',
+      controller: 'SignOutCtrl'
+  })
+
   .state('forgotpassword', {
       url: '/forgot-password',
+      cache: false,
       templateUrl: 'templates/forgot-password.html',
       controller: 'PWdRecoveryCtrl'
   })
@@ -52,6 +61,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','n
 
   .state('signup', {
       url: '/sign-up',
+      cache: false,
       templateUrl: 'templates/register.html',
       controller: 'SignInCtrl'
   })
@@ -67,6 +77,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','n
 
   .state('tab.dash', {
     url: '/dash',
+    cache: false,
     views: {
       'tab-dash': {
         templateUrl: 'templates/tab-dash.html',
@@ -77,6 +88,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','n
 
   .state('tab.search', {
       url: '/search/:typeCode',
+          cache: false,
       views: {
           'tab-search': {
               templateUrl: 'templates/search.html',
@@ -87,6 +99,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','n
 
   .state('tab.searchDefault', {
       url: '/searchDefault',
+
       views: {
           'tab-search': {
               templateUrl: 'templates/search.html',
@@ -98,6 +111,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','n
 
   .state('tab.search-detail', {
       url: '/search-detail/:userId/:userTypeId',
+          cache: false,
       views: {
           'tab-search': {
               templateUrl: 'templates/search-detail.html',

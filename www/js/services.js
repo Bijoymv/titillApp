@@ -6,20 +6,19 @@ angular.module('starter.services', [])
             var deferred = $q.defer();
             var promise = deferred.promise;
 
-            var  postData = {
+           /* var  postData = {
                 "login_password": pw,
                 "login_username": name
-            };
+            };*/
 
             var headers = {
                 'Content-Type': 'application/json'
             };
 
             var req = {
-                method: 'POST',
-                url: 'http://demo.titill.com/mobileapi/login',
-                headers: headers,
-                data: postData
+                method: 'GET',
+                url: 'http://demo.titill.com/mobileapi/loginajax?username='+name+'&password='+pw,
+                headers: headers
             };
 
 
