@@ -34,6 +34,7 @@
             </ion-header-bar>
             <ion-content>
                 <div class="list">
+                    <ion-search class="search-wrapper-light" placeholder="Search a city" min-length="1" model="items" source="getSearch(str)"></ion-search>
                     <!-- Multi select -->
                     <ion-toggle
                             ng-repeat="item in items"

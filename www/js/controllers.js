@@ -359,15 +359,11 @@ angular.module('starter.controllers', [])
         Object.keys($rootScope.cityNames).forEach(function(key,index) {
             // key: the name of the object key
             // index: the ordinal position of the key within the object
-            console.log("city",key);
-            console.log("city value",$rootScope.cityNames[key]);
-
             cityArray.push({id: $rootScope.cityNames[key], text: key, checked: false, icon: null});
         });
 
         // for select box directive
         $scope.countries = cityArray;
-        console.log( $scope.countries);
        /* $scope.countries = [
             {id: $scope.cityId, text: $scope.cityName, checked: true, icon: null},
             {id: 2, text: 'France', checked: false, icon: null},
@@ -965,6 +961,11 @@ angular.module('starter.controllers', [])
 
                         // Hide modal
                         scope.hideItems();
+
+                        // Hide modal
+                        scope.getSearch = function(str){
+                            console.log("inside search", str)
+                        }
 
                         // Execute callback function
                         if (typeof scope.callback == 'function') {
