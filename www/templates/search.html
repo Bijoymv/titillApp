@@ -4,7 +4,10 @@
             allow-empty='false'
             value="val.single"
             text="countries_text_single"
-            items="countries">
+            typeCode="typeCode"
+            items="countries"
+            callback="callbackFunctionInController(param)"
+            >
     </fancy-select>
 <ion-content class="has-header has-search-bar">
 
@@ -12,7 +15,7 @@
         <div class="searchDiv">
         <ion-list>
             <ion-item class="item-text-wrap" ng-click="showItems($event)">
-                Choose another city
+                {{text}}
                 <span class="item-note">
                   {{noteText}}
                   <img class="{{noteImgClass}}" ng-if="noteImg != ''" src="{{noteImg}}" />
@@ -34,7 +37,6 @@
             </ion-header-bar>
             <ion-content>
                 <div class="list">
-                    <ion-search class="search-wrapper-light" placeholder="Search a city" min-length="1" model="items" source="getSearch(str)"></ion-search>
                     <!-- Multi select -->
                     <ion-toggle
                             ng-repeat="item in items"
@@ -53,7 +55,7 @@
                             ng-repeat="item in items"
                             ng-if="!multiSelect"
                             class="item item-text-wrap"
-                            ng-click='validateSingle(item)'>
+                            ng-click='validateSingle(item,typeCode)'>
                         <div class="fancy-select-icon" ng-if="item.icon != null">
                             <i class="icon-{{item.text}}" style="background-image: url({{item.icon}})"></i>
                         </div>

@@ -344,18 +344,19 @@ angular.module('starter.controllers', [])
         //
         //$scope.$on('$ionicView.enter', function(e) {
         //});
-
+        var count,cityArray;
         console.log("Reached search controller");
-        $scope.cityName = $rootScope.geoCityName;
-        $scope.typeNameSel =  $rootScope.selectedTypeName;
-        $scope.cityId =  $rootScope.cityId;
-        $scope.typeCode =  $stateParams.typeCode;
-        $scope.items = [];
-        $scope.searchVal = $rootScope.cityNames;
+        $scope.cityName     =   $rootScope.geoCityName;
+        $scope.typeNameSel  =   $rootScope.selectedTypeName;
+        $scope.cityId       =   $rootScope.cityId;
+        $scope.typeCode     =   $stateParams.typeCode;
+        $scope.items        =   [];
+        $scope.searchVal    =   $rootScope.cityNames;
 
         console.log("city names available::::",$rootScope.cityNames);
-        var count = {upperLimit:10, lowerLimit:0};
-        var cityArray = [];
+        count       = {upperLimit:10, lowerLimit:0};
+        cityArray   = [];
+
         Object.keys($rootScope.cityNames).forEach(function(key,index) {
             // key: the name of the object key
             // index: the ordinal position of the key within the object
@@ -363,33 +364,34 @@ angular.module('starter.controllers', [])
         });
 
         // for select box directive
-        $scope.countries = cityArray;
-       /* $scope.countries = [
-            {id: $scope.cityId, text: $scope.cityName, checked: true, icon: null},
-            {id: 2, text: 'France', checked: false, icon: null},
-            {id : 3, text: 'Japan', checked: false, icon: null}];*/
+        $scope.countries                =   cityArray;
+        $scope.countries_text_single    =   'Choose different city';
+        $scope.countries_text_multiple  =   'Choose countries';
+        $scope.val                      =   {single: null, multiple: null};
 
-        $scope.countries_text_single = 'Choose different city';
-        $scope.countries_text_multiple = 'Choose countries';
-        $scope.val =  {single: null, multiple: null};
+
+
 
         //default scenario
         if(!$stateParams.typeCode){
-                $scope.typeCode = 'pca';
-                $scope.typeNameSel = 'Pet Care';
+                $scope.typeCode     =   'pca';
+                $scope.typeNameSel  =   'Pet Care';
         }
 
-        var getUserList = function() {
-            console.log("Inside getUserList");
+        $scope.getUserList = function() {
+            var params,userList;
             $ionicLoading.show({
                 template: 'loading..',
                 animation: 'fade-in',
                 noBackdrop: false
             });
-            var params = {cityId:$scope.cityId,typeCode:$scope.typeCode};
+
+            params = {cityId:$scope.cityId,typeCode:$scope.typeCode};
+
             SearchService.getUserList(params,count).success(function (data) {
-                var userList = [];
                 console.log("getUserList",data);
+                userList = [];
+
                 if (data.data["Search Result"] && data.data["Search Result"][0]) {
                     userList = data.data["Search Result"][0].data;
                     $scope.items = userList;
@@ -405,50 +407,54 @@ angular.module('starter.controllers', [])
             }).error(function (data) {
                 $scope.userData = false;
                 $ionicLoading.hide();
-
             });
         };
 
-        getUserList();
 
         $scope.loadMore = function() {
+            var params,userList;
             $ionicLoading.show({
                 template: 'loading..',
                 animation: 'fade-in',
                 noBackdrop: false
             });
             $scope.moredata = false;
-                console.log("InsideloadMore");
-                var params = {cityId:$scope.cityId,typeCode:$scope.typeCode};
-                count.lowerLimit = count.upperLimit;
-                count.upperLimit = count.upperLimit + 5;
 
-                SearchService.getNewUsers(params,count).then(function(items){
-                    console.log("getNewUsers is called");
-                    $ionicLoading.hide();
-                    var userList = [];
-                    if (items.data["Search Result"] && items.data["Search Result"][0]) {
-                        userList = items.data["Search Result"][0].data;
-                        console.log("userlist inside loadmore",userList.length);
-                        if(userList.length > 0){
-                            $scope.moredata = false;
-                        } else{
-                            $scope.moredata = true;
-                        }
-                        $scope.items = $scope.items.concat(userList);
+            console.log("InsideloadMore");
+            params              =   { cityId:$scope.cityId, typeCode:$scope.typeCode };
+            count.lowerLimit    =   count.upperLimit;
+            count.upperLimit    =   count.upperLimit + 5;
+
+            SearchService.getNewUsers(params,count).then(function(items){
+                console.log("getNewUsers is called");
+                $ionicLoading.hide();
+                userList = [];
+                if (items.data["Search Result"] && items.data["Search Result"][0]) {
+                    userList = items.data["Search Result"][0].data;
+                    console.log("userlist inside loadmore",userList.length);
+                    if(userList.length > 0){
+                        $scope.moredata = false;
                     } else{
-                        console.log("no data!!!!");
                         $scope.moredata = true;
                     }
-                    $scope.$broadcast('scroll.infiniteScrollComplete');
-                    if($scope.items.length > 0) {
-                        $scope.userData = true;
-                    }else{
-                        $scope.userData = false;
-                    }
-                });
+                    $scope.items = $scope.items.concat(userList);
+
+                } else{
+                    console.log("no data!!!!");
+                    $scope.moredata = true;
+                }
+                $scope.$broadcast('scroll.infiniteScrollComplete');
+                if($scope.items.length > 0) {
+                    $scope.userData = true;
+                }else{
+                    $scope.userData = false;
+                }
+            });
         };
 
+        $scope.callbackFunctionInController = function(item){
+           console.log("----inside callbackFunctionInController---",item);
+        };
     })
 
 .controller('SearchDetailCtrl', function($scope, $stateParams, SearchService, $ionicLoading, $state, geoLocationService, $rootScope) {
@@ -489,7 +495,7 @@ angular.module('starter.controllers', [])
                 $ionicLoading.hide();
 
             }).error(function (data) {
-                console.log("searchDetails not details avilable",data);
+                console.log("searchDetails not details available",data);
                 $ionicLoading.hide();
             });
         };
@@ -764,7 +770,7 @@ angular.module('starter.controllers', [])
 
                     var matches = airlines.filter( function(airline) {
                         if(airline.name.toLowerCase().indexOf(searchFilter.toLowerCase()) !== -1 ) return true;
-                    })
+                    });
 
                     $timeout( function(){
 
@@ -855,8 +861,8 @@ angular.module('starter.controllers', [])
 
 .directive('fancySelect',
     [
-        '$ionicModal',
-        function($ionicModal) {
+        '$ionicModal','SearchService',
+        function($ionicModal, SearchService, $state) {
             return {
                 /* Only use as <fancy-select> tag */
                 restrict : 'E',
@@ -868,12 +874,19 @@ angular.module('starter.controllers', [])
                 scope: {
                     'items'        : '=', /* Items list is mandatory */
                     'text'         : '=', /* Displayed text is mandatory */
+                    'typeCode'     : '=', /* typeCode is mandatory */
                     'value'        : '=', /* Selected value binding is mandatory */
-                    'typeNameSel'  : '=', /* Selected value binding is mandatory */
-                    'callback'     : '&'
+                    'callback'     : '&mySaveCallback'
+                },
+
+                controller: function($scope, $rootScope, $state){
+                    console.log("rootscope ::::::;",$rootScope.geoCityName);
+
                 },
 
                 link: function (scope, element, attrs) {
+
+                    console.log("inside link");
 
                     /* Default values */
                     scope.multiSelect   = attrs.multiSelect === 'true' ? true : false;
@@ -922,10 +935,12 @@ angular.module('starter.controllers', [])
                         {'scope': scope}
                     ).then(function(modal) {
                             scope.modal = modal;
+                            console.log("inside fromTemplateUrl");
                         });
 
                     /* Validate selection from header bar */
                     scope.validate = function (event) {
+                        console.log("inside validate");
                         // Construct selected values and selected text
                         if (scope.multiSelect == true) {
 
@@ -954,8 +969,10 @@ angular.module('starter.controllers', [])
 
                                 // Check for multi select
                                 scope.items[0].checked = true;
+                                console.log("inside validate undefined");
                             } else {
                                 scope.text = scope.defaultText;
+                                console.log("inside validate defaultText");
                             }
                         }
 
@@ -965,45 +982,58 @@ angular.module('starter.controllers', [])
                         // Hide modal
                         scope.getSearch = function(str){
                             console.log("inside search", str)
-                        }
+                        };
 
                         // Execute callback function
                         if (typeof scope.callback == 'function') {
+                            console.log("inside callback");
                             scope.callback (scope.value);
                         }
                     };
 
                     /* Show list */
                     scope.showItems = function (event) {
+                        console.log("inside showItems");
+
                         event.preventDefault();
                         scope.modal.show();
                     };
 
                     /* Hide list */
                     scope.hideItems = function () {
+                        console.log("inside hideItems");
                         scope.modal.hide();
                     };
 
                     /* Destroy modal */
                     scope.$on('$destroy', function() {
+                        console.log("inside $destroy");
                         scope.modal.remove();
                     });
 
                     /* Validate single with data */
                     scope.validateSingle = function (item) {
-
+                        console.log("inside validateSingle",item);
                         // Set selected text
                         scope.text = item.text;
 
                         // Set selected value
                         scope.value = item.id;
 
+
+                        console.log("inside validateSingle----",item);
+
                         // Hide items
                         scope.hideItems();
 
+
+
                         // Execute callback function
                         if (typeof scope.callback == 'function') {
-                            scope.callback (scope.value);
+                            console.log("inside Execute callback");
+                            //var params = {typeCode:type_id};
+                           // $state.go("tab.search",params);
+                            scope.callback ({id: scope.value,text:scope.text});
                         }
                     }
                 }
