@@ -6,7 +6,7 @@
             text="countries_text_single"
             typeCode="typeCode"
             items="countries"
-            callback="callbackFunctionInController(param)"
+            callback="callbackFunctionInController"
             >
     </fancy-select>
 <ion-content class="has-header has-search-bar">
@@ -27,29 +27,23 @@
     <script id="fancy-select-items.html" type="text/ng-template">
         <ion-view class="fancy-select-items modal">
             <ion-header-bar class="bar-assertive">
-
-                <button ng-click="hideItems()" class="button button-positive button-icon ion-ios7-arrow-back"></button>
-
                 <h1 class="title">{{headerText}}</h1>
-
-                <button ng-click="validate()" class="button button-positive button-icon ion-checkmark"></button>
-
             </ion-header-bar>
+          <!--  <ion-header-bar class="bar-light bar-subheader">
+                <input type="search"
+                       placeholder="Search Cities"
+                       ng-model="search"
+                       ng-focus="searchFocused = true"
+                       ng-blur="searchFocused = false"
+                       ng-change="scrollTop()"
+                       class="full-width">
+                <button ng-if="search.length"
+                        class="button button-icon ion-android-close input-button"
+                        ng-click="clearSearch()">
+                </button>
+            </ion-header-bar>-->
             <ion-content>
                 <div class="list">
-                    <!-- Multi select -->
-                    <ion-toggle
-                            ng-repeat="item in items"
-                            ng-if="multiSelect"
-                            ng-checked="item.checked"
-                            ng-model="item.checked"
-                            class="item item-text-wrap">
-                        <div class="fancy-select-icon" ng-if="item.icon != null">
-                            <img src="{{item.icon}}" />
-                        </div>
-                        {{item.text}}
-                    </ion-toggle>
-
                     <!-- Single select -->
                     <label
                             ng-repeat="item in items"
@@ -66,13 +60,13 @@
         </ion-view>
     </script>
 
-    <ion-list>
-        <ion-item ng-if="userData === true" class="item-remove-animate item-avatar item-icon-right" ng-repeat="item in items" type="item-text-wrap" href="#/tab/search-detail/{{item.userid}}/{{item.usertypeid}}">
-                    <img ng-src="img/default.jpg">
-                    <h2>{{item.pagename}}</h2>
-                    <p>{{item.location}}</p>
-        </ion-item>
-    </ion-list>
+    <div class="list">
+        <a class="item item-thumbnail-left" ng-if="userData === true"   href="#/tab/search-detail/{{item.userid}}/{{item.usertypeid}}/{{cityName}}" ng-repeat="item in items" type="item-text-wrap">
+            <img ng-src="img/default.jpg">
+            <h2>{{item.pagename}}</h2>
+            <p>{{item.location}}</p>
+        </a>
+    </div>
 
     <div class="card" ng-if="userData === false" >
         <div class="item item-text-wrap">

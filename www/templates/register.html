@@ -1,26 +1,38 @@
 <ion-view view-title="Titill SIGN UP">
     <ion-content padding="true">
         <div class="list">
-            <p>SIGN UP</p>
+
             <label class="item item-input">
-                <input type="text" ng-model="data.email"  placeholder="Email">
+                <span class="input-label">Email</span>
+                <input type="email" ng-model="data.pop_email">
             </label>
             <label class="item item-input">
-                <input type="text" ng-model="data.password"  placeholder="Password">
+                <span class="input-label">Password</span>
+                <input type="password" ng-model="data.pop_pwd">
             </label>
             <label class="item item-input">
-                <input type="text" ng-model="data.cnfPassword"  placeholder="Confirm Password">
+                <span class="input-label">Confirm Password</span>
+                <input type="password" ng-model="data.pop_con_pwd">
             </label>
             <label class="item item-input">
-                <input type="text" ng-model="data.dob"  placeholder="DOB">
+                <span class="input-label">DOB</span>
+                <input type="date" ng-model="data.pop_con_regdob">
             </label>
-            <label class="item item-input">
-                <input type="text" ng-model="data.type"  placeholder="User Type">
+            <label class="item item-input item-select item-light">
+                <div class="input-label">
+                    Select User Type
+                </div>
+                <select ng-model="data.tit_select_box">
+                    <option ng-repeat="item in userType" value="{{item.type_code}}">
+                      {{ item.name }}
+                    </option>
+
+                </select>
             </label>
         </div>
-        <p>I agree with the <a>terms & conditions</a> </p>
+        <ion-checkbox ng-model="data.isChecked" class="checkbox-assertive">I agree with the terms & conditions</ion-checkbox>
         <div class="padding">
-            <button class="button button-block button-assertive" ng-click="getPwd()">Submit</button>
+            <button class="button button-block button-assertive" ng-click="signUp()">Submit</button>
         </div>
 
     </ion-content>

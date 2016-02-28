@@ -17,7 +17,9 @@
 
             <div class="item item-body">
                 <img class="full-image detailImg" src="{{bannerImage}}">
-
+                <button class="button button-small button-assertive" ng-click="claim();">
+                    Claim your listing
+                </button>
                 <div class="card" ng-class="{'hide':searchDetails.page_contact_address === '' && searchDetails.page_website ==='' && searchDetails.page_email ===''}">
                     <div class="item item-text-wrap" ng-class="{'hide':searchDetails.page_contact_address === ''}">
                         {{searchDetails.page_contact_address}}

@@ -38,6 +38,13 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','n
       controller: 'SignInCtrl'
   })
 
+  .state('claim', {
+      url: '/claim/:claim_pageid/:claim_useridid',
+      cache: false,
+      templateUrl: 'templates/claim.html',
+      controller: 'ClaimCtrl'
+  })
+
   .state('signout', {
       url: '/sign-out',
       cache: false,
@@ -63,7 +70,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','n
       url: '/sign-up',
       cache: false,
       templateUrl: 'templates/register.html',
-      controller: 'SignInCtrl'
+      controller: 'SignUpCtrl'
   })
 
   // setup an abstract state for the tabs directive
@@ -110,7 +117,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services','n
 
 
   .state('tab.search-detail', {
-      url: '/search-detail/:userId/:userTypeId',
+      url: '/search-detail/:userId/:userTypeId/:citySelected',
           cache: false,
       views: {
           'tab-search': {

@@ -1,115 +1,12 @@
 angular.module('starter.controllers', [])
 
-.controller('SignInCtrl', function($http, $scope, $rootScope,$ionicHistory, LoginService, $ionicPopup, $state, $ionicLoading, LocalStorage, geoLocation, geoLocationService, $cordovaGeolocation) {
+.controller('SignInCtrl', function($http,UserService, $scope, $rootScope,$ionicHistory, LoginService, $ionicPopup, $state, $ionicLoading, LocalStorage) {
     $scope.data = {};
-
+        $ionicLoading.show({
+            template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring Data!'
+        });
     console.log("Entered the sign in controller");
     ionic.Platform.ready(function() {
-
-            var getCities = function (){
-                LoginService.getCities().success(function (data) {
-                    var cityNames = new Array();
-                    if (data.data.city_names[0].data) {
-                        for(var i=0; i< data.data.city_names[0].data.length; i++){
-                            cityNames[data.data.city_names[0].data[i].name]=data.data.city_names[0].data[i].id;
-                        }
-                    }
-                    $rootScope.cityNames = cityNames;
-                    console.log("CityNames:::",$rootScope.cityNames);
-                }).error(function (data) {
-                    console.log("error in fetching city names",data);
-                    $rootScope.cityNames = [];
-                });
-            };
-
-            if(!$rootScope.cityNames){
-                getCities();
-            }
-
-        var getGeoCity = function() {
-
-            console.log("Inside getGeoCity");
-            $ionicLoading.show({
-                template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring location!'
-            });
-            var posOptions = {
-                maximumAge: 3000, timeout: 5000, enableHighAccuracy: true
-            };
-            //default City
-            $rootScope.geoCityName = "Chennai";
-            // error, default latitude and longitude for chennai
-            $rootScope.lat = 13.0524;
-            $rootScope.long = 80.2508;
-
-            $cordovaGeolocation.getCurrentPosition(posOptions).then(function (position) {
-                var lat = position.coords.latitude;
-                var long = position.coords.longitude;
-                $rootScope.lat = lat;
-                $rootScope.long = long;
-                console.log("positions", lat, long);
-                geoLocationService.getCity(lat, long).success(function (json) {
-                    console.log("getCity success", json);
-                    $rootScope.geoCityName = null;
-                    if (json.data.status == "OK") {
-                        var result = json.data.results[0];
-                        var city = "";
-                        var state = "";
-                        for (var i = 0, len = result.address_components.length; i < len; i++) {
-                            var ac = result.address_components[i];
-                            if (ac.types.indexOf("administrative_area_level_1") >= 0) state = ac.long_name;
-                            if (ac.types.indexOf("administrative_area_level_2") >= 0) city = ac.long_name;
-                        }
-                        if (state !== '') {
-                            console.log("You are in " + city + ", " + state + "!");
-                            $rootScope.geoCityName = city;
-                            if (city == "bengaluru" || city == "Bengaluru" || city == "Bangalore Urban" || city == "bangalore urban") {
-                                console.log("Bangalore");
-                                $rootScope.geoCityName = "Bangalore";
-                            }
-                        }
-
-                        LocalStorage.setObject('geoCity', {
-                            geoCityName: $rootScope.geoCityName,
-                            lat: $rootScope.lat,
-                            long: $rootScope.long
-                        });
-
-                    } else {
-                        console.log("Error in getting the city name");
-                    }
-
-                    $ionicLoading.hide();
-                }).error(function (data) {
-                    console.log("getCity error", data);
-                    $ionicLoading.hide();
-                });
-
-            }, function (err) {
-                $ionicLoading.hide();
-                var alertPopup = $ionicPopup.alert({
-                    title: 'Not able to get the current location!',
-                    template: 'Please check internet connection or allow location',
-                    buttons: [
-                        {
-                            text: '<b>OK</b>',
-                            type: 'button-assertive'
-                        }
-                    ]
-                });
-            });
-        };
-
-        var cityDetails = LocalStorage.getObject('geoCity');
-        if(cityDetails.geoCityName){
-            console.log("----- geoCityName",cityDetails.geoCityName);
-            $rootScope.lat = cityDetails.lat;
-            $rootScope.long = cityDetails.long;
-            $rootScope.geoCityName = cityDetails.geoCityName;
-        } else {
-
-            getGeoCity();
-            console.log("----Reached geoCityName & nothing saved in local Storage");
-        }
 
             var loginDetails = LocalStorage.getObject('loginDetails');
             if(loginDetails.username){
@@ -117,8 +14,10 @@ angular.module('starter.controllers', [])
                 $ionicHistory.nextViewOptions({
                     disableBack: true
                 });
+                $ionicLoading.hide();
                 $state.go('tab.dash');
             } else{
+                $ionicLoading.hide();
                 console.log("Reached SignInCtrl & nothing saved in local Storage");
             }
         });
@@ -133,11 +32,11 @@ angular.module('starter.controllers', [])
             LoginService.loginUser($scope.data.username, $scope.data.password).success(function (data) {
                 console.log("Inside loginuser",data);
                 $ionicLoading.hide();
-                if (data.data.Login) {
+                if (data.data.Login && data.data.Login[0].data[0]) {
                     LocalStorage.setObject('loginDetails', {
-                        username: data.Login.data.username,
-                        user_typecode: data.Login.data.user_typecode,
-                        userid: data.Login.data.userid
+                        username: data.data.Login[0].data[0].username,
+                        user_typecode: data.data.Login[0].data[0].user_typecode,
+                        userid: data.data.Login[0].data[0].userid
                     });
 
                     $ionicHistory.nextViewOptions({
@@ -151,7 +50,7 @@ angular.module('starter.controllers', [])
                     $ionicHistory.nextViewOptions({
                         disableBack: true
                     });
-                    $state.go('tab.dash');
+                    //$state.go('tab.dash');
                     var alertPopup = $ionicPopup.alert({
                         title: 'Login failed!',
                         template: data.data.Error[0].message,
@@ -168,7 +67,7 @@ angular.module('starter.controllers', [])
                 $ionicHistory.nextViewOptions({
                     disableBack: true
                 });
-                $state.go('tab.dash');
+                //$state.go('tab.dash');
                 $ionicLoading.hide();
                 var alertPopup = $ionicPopup.alert({
                     title: 'Login failed!',
@@ -185,18 +84,158 @@ angular.module('starter.controllers', [])
 
 })
 
-.controller('PWdRecoveryCtrl', function($http, $scope, $rootScope, LoginService, $ionicPopup, $state, $ionicLoading, $ionicHistory) {
+.controller('SignUpCtrl', function($http,UserService, $scope, $rootScope,$ionicHistory, LoginService, $ionicPopup, $state, $ionicLoading){
+        $scope.data = {};
 
-        $scope.getPwd = function(val) {
+        $ionicLoading.show({
+            template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring Data!'
+        });
+        UserService.getUserType().success(function(data) {
+            var userType = data.data.usertype[0].data;
+            $scope.userType = userType;
+            $ionicLoading.hide();
+
+        }).error(function(data) {
+            $scope.userType = [];
+            $ionicLoading.hide();
+        });
+
+        $scope.signUp = function(){
+
+            console.log("inside signup",$scope.data);
+
+            var email = $scope.data.pop_email;
+            var re = /[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,4}/igm;
+            var errorString = "";
+            var dob, date, dateOfBirth = $scope.data.pop_con_regdob;
+
+            var pwd = $scope.data.pop_pwd;
+            var confPwd = $scope.data.pop_con_pwd;
+            var selectType = $scope.data.tit_select_box;
+            var isChecked = $scope.data.isChecked;
+
+            if (!email || email == '' || !re.test(email))
+            {
+                errorString = errorString + '<br/>* Valid Email';
+            }
+
+            if(!pwd || pwd == '' ){
+                errorString = errorString + '<br/>* Password';
+            }
+
+            if(pwd && pwd != '' && pwd !== confPwd ){
+                errorString = errorString + '<br/>* Confirm password is not matching with password';
+            }
+
+            if(!dateOfBirth || dateOfBirth == ''){
+                errorString = errorString + '<br/>* DOB';
+            } else{
+                date = new Date($scope.data.pop_con_regdob);
+                dob = (date.getMonth() + 1) + '/' + date.getDate() + '/' +  date.getFullYear();
+            }
+
+            if(!selectType || selectType == ''){
+                errorString = errorString + '<br/>* User Type';
+            }
+
+            if(!isChecked || isChecked == ''){
+                errorString = errorString + '<br/>* Agree terms and conditions';
+            }
+
+
+            if(errorString == ''){
+                $ionicLoading.show({
+                    template: 'loading..',
+                    animation: 'fade-in',
+                    noBackdrop: false
+                });
+                LoginService.signUp($scope.data.pop_email, $scope.data.pop_pwd, $scope.data.pop_con_pwd,
+                    dob, $scope.data.tit_select_box).success(function (data) {
+                        console.log("Inside signup",data);
+                        $ionicLoading.hide();
+                        if (data.data.Signup && data.data.Signup[0].status == 'success') {
+                            $ionicPopup.alert({
+                                title: 'Success!',
+                                template: data.data.Signup[0].message,
+                                buttons: [
+                                    {
+                                        text: '<b>OK</b>',
+                                        type: 'button-assertive'
+                                    }
+                                ]
+                            });
+
+                            $ionicHistory.nextViewOptions({
+                                disableBack: true
+                            });
+                            $state.go('signin');
+                        }
+
+                        if (data.data.Error) {
+                            console.log("Inside ERROR message",data.data.Error[0]);
+                            $ionicHistory.nextViewOptions({
+                                disableBack: true
+                            });
+                            // $state.go('tab.dash');
+                            $ionicPopup.alert({
+                                title: 'Sign up failed!',
+                                template: data.data.Error[0].message,
+                                buttons: [
+                                    {
+                                        text: '<b>OK</b>',
+                                        type: 'button-assertive'
+                                    }
+                                ]
+                            });
+                        }
+
+                    }).error(function (data) {
+                        $ionicHistory.nextViewOptions({
+                            disableBack: true
+                        });
+                        $ionicLoading.hide();
+                        $ionicPopup.alert({
+                            title: 'Signup failed!',
+                            template: 'Please check details!',
+                            buttons: [
+                                {
+                                    text: '<b>OK</b>',
+                                    type: 'button-assertive'
+                                }
+                            ]
+                        });
+                    });
+            } else{
+                $ionicPopup.alert({
+                    title: 'Please enter the mandatory fields',
+                    template: errorString,
+                    buttons: [
+                        {
+                            text: '<b>OK</b>',
+                            type: 'button-assertive'
+                        }
+                    ]
+                });
+            }
+
+        };
+
+
+
+    })
+
+.controller('PWdRecoveryCtrl', function($http, $scope, $rootScope, LoginService, $ionicPopup, $state, $ionicLoading, $ionicHistory) {
+        $scope.data = {};
+        $scope.getPwd = function() {
             $ionicLoading.show({
                 template: 'loading..',
                 animation: 'fade-in',
                 noBackdrop: false
             });
-            LoginService.getUserPwd(val).success(function(data) {
+            LoginService.getUserPwd($scope.data.email).success(function(data) {
                 var responseData = data.data;
                 $ionicLoading.hide();
-                if(responseData.Error){
+                if(responseData.Error[0].status === 'error'){
                     var alertPopup = $ionicPopup.alert({
                         title: 'Error',
                         template: responseData.Error[0].message,
@@ -211,7 +250,7 @@ angular.module('starter.controllers', [])
                 }else{
                     var alertPopup = $ionicPopup.alert({
                         title: 'Success',
-                        template: 'Password is sent to your email address. Please check the email to get the details.',
+                        template: responseData.Error[0].message,
                         buttons: [
                             {
                                 text: '<b>OK</b>',
@@ -219,13 +258,13 @@ angular.module('starter.controllers', [])
                             }
                         ]
                     });
-
+                    $state.go('signin');
                 }
 
                 $ionicHistory.nextViewOptions({
                     disableBack: true
                 });
-                $state.go('signin');
+
             }).error(function(data) {
                 $ionicLoading.hide();
                 var alertPopup = $ionicPopup.alert({
@@ -244,97 +283,237 @@ angular.module('starter.controllers', [])
 
     })
 
-.controller('DashCtrl', function($scope, UserService, $ionicPopup, $state, $ionicLoading, LocalStorage, $rootScope) {
+.controller('DashCtrl', function($scope, $timeout,UserService,LoginService, $ionicPopup, $state, $ionicLoading, LocalStorage, $rootScope, $cordovaGeolocation, geoLocationService) {
+        $scope.cityName = "";
+        ionic.Platform.ready(function() {
 
-        $scope.userType = null;
-        $scope.images = null;
-        $scope.cityName = $rootScope.geoCityName;
-        console.log("Dash ---",$rootScope.geoCityName);
-        if($rootScope.cityNames){
-            if($rootScope.geoCityName!== null){
-                $scope.cityId = parseInt($rootScope.cityNames[$rootScope.geoCityName]);
-                //$scope.cityId = 232; //Bangalore ID
-                console.log("Reached DashCtrl $scope.cityId loop::::::",$scope.cityId);
-            } else {
-                $scope.cityId = 483; // Chennai ID
-            }
-        } else{
-            $scope.cityId = 483; // Chennai ID
-        }
-        $rootScope.cityId =  $scope.cityId;
+           var getGeoCity = function() {
+               var cityDetails = LocalStorage.getObject('geoCity');
+               if(!cityDetails.default) {
+                   $ionicLoading.show({
+                       template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring Location!'
+                   });
+                   console.log("Inside getGeoCity");
 
-       var getUserType = function() {
-            $ionicLoading.show({
-                template: 'loading..',
-                animation: 'fade-in',
-                noBackdrop: false
-            });
-           var imagesVal = ["img/petOwners.svg",
-               "img/petCares.svg",
-               "img/petStores.svg",
-               "img/petClubs.svg",
-               "img/petCommunities.svg",
-               "img/petEvents.svg",
-               "img/petCharity.svg",
-               "img/petBreeders.svg",
-               "img/petEducation.svg",
-               "img/petFriendlyHotels.svg",
-               "img/petGrooming.svg",
-               "img/PetTrainers.svg",
-               "img/petSpecialServices.svg",
-               "img/petVetsClinic.svg"
-           ];
+                   var posOptions = {
+                       maximumAge: 3000, timeout: 5000, enableHighAccuracy: true
+                   };
+                   //default City
+                   $rootScope.geoCityName = "Chennai";
+                   // error, default latitude and longitude for chennai
+                   $rootScope.lat = 13.0524;
+                   $rootScope.long = 80.2508;
+                   $rootScope.default = false;
+                   LocalStorage.removeItem('geoCity');
+                   LocalStorage.setObject('geoCity', {
+                       default: $rootScope.default,
+                       lat:$rootScope.lat,
+                       long:$rootScope.long,
+                       geoCityName:$rootScope.geoCityName
+                   });
 
-           var images = new Array();
 
-           for(var i=1; i<15; i++){
-               images[i]= imagesVal[i-1];
+                   $cordovaGeolocation.getCurrentPosition(posOptions).then(function (position) {
+                       var lat = position.coords.latitude;
+                       var long = position.coords.longitude;
+                       $rootScope.lat = lat;
+                       $rootScope.long = long;
+                       console.log("positions", lat, long);
+                       geoLocationService.getCity(lat, long).success(function (json) {
+                           console.log("getCity success", json);
+                           $rootScope.geoCityName = null;
+                           if (json.data.status == "OK") {
+                               var result = json.data.results[0];
+                               var city = "";
+                               var state = "";
+                               for (var i = 0, len = result.address_components.length; i < len; i++) {
+                                   var ac = result.address_components[i];
+                                   if (ac.types.indexOf("administrative_area_level_1") >= 0) state = ac.long_name;
+                                   if (ac.types.indexOf("administrative_area_level_2") >= 0) city = ac.long_name;
+                               }
+                               if (state !== '') {
+                                   console.log("You are in " + city + ", " + state + "!");
+                                   $rootScope.geoCityName = city;
+                                   if (city == "bengaluru" || city == "Bengaluru" || city == "Bangalore Urban" || city == "bangalore urban") {
+                                       console.log("Bangalore");
+                                       $rootScope.geoCityName = "Bangalore";
+                                   }
+                               }
+                               $rootScope.default = true;
+
+                               LocalStorage.removeItem('geoCity');
+                               LocalStorage.setObject('geoCity', {
+                                   default: $rootScope.default,
+                                   lat:$rootScope.lat,
+                                   long:$rootScope.long,
+                                   geoCityName:$rootScope.geoCityName
+                               });
+
+                           } else {
+                               console.log("Error in getting the city name");
+                           }
+                           $scope.cityName = $rootScope.geoCityName;
+
+                           if ($rootScope.cityNames) {
+                               $scope.cityId = parseInt($rootScope.cityNames[$rootScope.geoCityName]);
+                               $rootScope.cityId = $scope.cityId;
+                           } else {
+                               $scope.cityId = 483;
+                               $rootScope.cityId = $scope.cityId;
+                           }
+                           $ionicLoading.hide();
+                       }).error(function (data) {
+                           $scope.cityName = $rootScope.geoCityName;
+                           if ($rootScope.cityNames) {
+                               $scope.cityId = parseInt($rootScope.cityNames[$rootScope.geoCityName]);
+                               $rootScope.cityId = $scope.cityId;
+                           } else {
+                               $scope.cityId = 483;
+                               $rootScope.cityId = $scope.cityId;
+                           }
+                           console.log("getCity error", data);
+                           $ionicLoading.hide();
+                       });
+
+                   }, function (err) {
+                       $scope.cityName = $rootScope.geoCityName;
+                       if ($rootScope.cityNames) {
+                           $scope.cityId = parseInt($rootScope.cityNames[$rootScope.geoCityName]);
+                           $rootScope.cityId = $scope.cityId;
+                       } else {
+                           $scope.cityId = 483;
+                           $rootScope.cityId = $scope.cityId;
+                       }
+                       $ionicLoading.hide();
+                       var alertPopup = $ionicPopup.alert({
+                           title: 'Not able to get the current location!',
+                           template: 'Please check internet connection or allow location',
+                           buttons: [
+                               {
+                                   text: '<b>OK</b>',
+                                   type: 'button-assertive'
+                               }
+                           ]
+                       });
+
+                   });
+               }
+               else{
+                   $scope.lat = cityDetails.lat;
+                   $scope.long = cityDetails.long;
+                   $timeout(function() {
+                       $scope.cityName = cityDetails.geoCityName;
+                   }, 500);
+
+                   $rootScope.geoCityName = cityDetails.geoCityName;
+                   console.log("cityNamesssss::::", $scope.cityName);
+                   $scope.cityId = parseInt($rootScope.cityNames[cityDetails.geoCityName]);
+                   $rootScope.cityId = $scope.cityId;
+               }
+           };
+
+           var getCities = function (){
+               LoginService.getCities().success(function (data) {
+                   var cityNames = new Array();
+                   if (data.data.city_names[0].data) {
+                       for(var i=0; i< data.data.city_names[0].data.length; i++){
+                           cityNames[data.data.city_names[0].data[i].name]=data.data.city_names[0].data[i].id;
+                       }
+                   }
+                   $rootScope.cityNames = cityNames;
+                   console.log("CityNames:::",$rootScope.cityNames);
+                   getGeoCity();
+               }).error(function (data) {
+                   console.log("error in fetching city names",data);
+                   $rootScope.cityNames = [];
+                   getGeoCity();
+               });
+           };
+
+           if($rootScope.cityNames && $rootScope.cityNames.length > 0){
+               getGeoCity();
+           } else{
+               getCities();
            }
-           UserService.getUserType().success(function(data) {
-                var userType = data.data.usertype[0].data;
-                $scope.userType = userType;
 
-                for(var i=0;i<$scope.userType.length;i++){
-                    $scope.userType[i].img = images[parseInt($scope.userType[i].type_id)];
-                }
+            $scope.userType = null;
+            $scope.images = null;
 
-                LocalStorage.setObject('userTypes', {
-                    userType: $scope.userType
+           var getUserType = function() {
+                $ionicLoading.show({
+                    template: 'loading..',
+                    animation: 'fade-in',
+                    noBackdrop: false
                 });
+               var imagesVal = ["img/petOwners.svg",
+                   "img/petCares.svg",
+                   "img/petStores.svg",
+                   "img/petClubs.svg",
+                   "img/petCommunities.svg",
+                   "img/petEvents.svg",
+                   "img/petCharity.svg",
+                   "img/petBreeders.svg",
+                   "img/petEducation.svg",
+                   "img/petFriendlyHotels.svg",
+                   "img/petGrooming.svg",
+                   "img/PetTrainers.svg",
+                   "img/petSpecialServices.svg",
+                   "img/petVetsClinic.svg"
+               ];
 
-                $ionicLoading.hide();
+               var images = new Array();
 
-            }).error(function(data) {
-                $ionicLoading.hide();
-                var alertPopup = $ionicPopup.alert({
-                    title: 'Data not available!',
-                    template: 'Can you check if internet is connected?',
-                    buttons: [
-                        {
-                            text: '<b>OK</b>',
-                            type: 'button-assertive'
-                        }
-                    ]
+               for(var i=1; i<15; i++){
+                   images[i]= imagesVal[i-1];
+               }
+               UserService.getUserType().success(function(data) {
+                    var userType = data.data.usertype[0].data;
+                    $scope.userType = userType;
+
+                    for(var i=0;i<$scope.userType.length;i++){
+                        $scope.userType[i].img = images[parseInt($scope.userType[i].type_id)];
+                    }
+
+                   $rootScope.userType = $scope.userType;
+
+                   /* LocalStorage.setObject('userTypes', {
+                        userType: $scope.userType
+                    });*/
+
+                    $ionicLoading.hide();
+
+                }).error(function(data) {
+                    $ionicLoading.hide();
+                    var alertPopup = $ionicPopup.alert({
+                        title: 'Data not available!',
+                        template: 'Can you check if internet is connected?',
+                        buttons: [
+                            {
+                                text: '<b>OK</b>',
+                                type: 'button-assertive'
+                            }
+                        ]
+                    });
                 });
-            });
-        };
+            };
 
-        var userTypes = LocalStorage.getObject('userTypes');
-        if (userTypes.userType === undefined) {
-            getUserType();
-        } else{
-            $scope.userType = userTypes.userType;
-        }
+            //var userTypes = LocalStorage.getObject('userTypes');
+            if ($rootScope.userType  === undefined) {
+                getUserType();
+            } else{
+                $scope.userType = $rootScope.userType;
+            }
 
-        $scope.getListing = function(type_id,type_name){
-            $rootScope.selectedTypeName = type_name;
-            $rootScope.selectedTypeId = type_id;
-            console.log("inside getListing ::::selectedTypeName::",type_name);
-            var params = {typeCode:type_id};
-            $state.go("tab.search",params);
-        };
+            $scope.getListing = function(type_id,type_name){
+                $rootScope.selectedTypeName = type_name;
+                $rootScope.selectedTypeId = type_id;
+                console.log("inside getListing ::::selectedTypeName::",type_name);
+                var params = {typeCode:type_id};
+                $state.go("tab.search",params);
+            };
 
-})
+    })
+    })
 
 .controller('SearchCtrl', function($scope, SearchService, $stateParams, $ionicPopup, $state, $ionicLoading, $rootScope) {
         // With the new view caching in Ionic, Controllers are only called
@@ -346,7 +525,13 @@ angular.module('starter.controllers', [])
         //});
         var count,cityArray;
         console.log("Reached search controller");
+        $ionicLoading.show({
+            template: 'loading..',
+            animation: 'fade-in',
+            noBackdrop: false
+        });
         $scope.cityName     =   $rootScope.geoCityName;
+        console.log("cityName::::", $rootScope.geoCityName);
         $scope.typeNameSel  =   $rootScope.selectedTypeName;
         $scope.cityId       =   $rootScope.cityId;
         $scope.typeCode     =   $stateParams.typeCode;
@@ -378,15 +563,17 @@ angular.module('starter.controllers', [])
                 $scope.typeNameSel  =   'Pet Care';
         }
 
-        $scope.getUserList = function() {
+         var getUserList = function(selectedItem) {
             var params,userList;
-            $ionicLoading.show({
-                template: 'loading..',
-                animation: 'fade-in',
-                noBackdrop: false
-            });
-
-            params = {cityId:$scope.cityId,typeCode:$scope.typeCode};
+            if(selectedItem) {
+                $scope.cityName     =   selectedItem.text;
+                $scope.cityId       =   selectedItem.id;
+                params = {cityId:selectedItem.id,typeCode:$scope.typeCode};
+                count       = {upperLimit:10, lowerLimit:0};
+            } else{
+                params = {cityId:$scope.cityId,typeCode:$scope.typeCode};
+                count       = {upperLimit:10, lowerLimit:0};
+            }
 
             SearchService.getUserList(params,count).success(function (data) {
                 console.log("getUserList",data);
@@ -395,6 +582,7 @@ angular.module('starter.controllers', [])
                 if (data.data["Search Result"] && data.data["Search Result"][0]) {
                     userList = data.data["Search Result"][0].data;
                     $scope.items = userList;
+                    console.log("$scope.items",$scope.items);
                 }
 
                 if (userList.length > 0) {
@@ -409,6 +597,8 @@ angular.module('starter.controllers', [])
                 $ionicLoading.hide();
             });
         };
+
+        getUserList();
 
 
         $scope.loadMore = function() {
@@ -438,6 +628,7 @@ angular.module('starter.controllers', [])
                         $scope.moredata = true;
                     }
                     $scope.items = $scope.items.concat(userList);
+                    console.log("$scope.items",$scope.items);
 
                 } else{
                     console.log("no data!!!!");
@@ -453,11 +644,11 @@ angular.module('starter.controllers', [])
         };
 
         $scope.callbackFunctionInController = function(item){
-           console.log("----inside callbackFunctionInController---",item);
+            getUserList(item);
         };
     })
 
-.controller('SearchDetailCtrl', function($scope, $stateParams, SearchService, $ionicLoading, $state, geoLocationService, $rootScope) {
+.controller('SearchDetailCtrl', function($scope, LocalStorage, $stateParams, SearchService, $ionicLoading, $state, geoLocationService, $rootScope) {
         var getUserImage = function() {
             var baseURL = "http://demo.titill.com/";
             SearchService.getSearchImage($stateParams.userId).success(function (data) {
@@ -630,9 +821,6 @@ angular.module('starter.controllers', [])
         $scope.callPhone = function(number){
             window.plugins.CallNumber.callNumber(onSuccessCall, onErrorCall, number, true);
         };
-
-
-
         $scope.navigate = function(){
             console.log("inside navigate");
 
@@ -643,7 +831,7 @@ angular.module('starter.controllers', [])
                     var addr = $scope.searchDetails.page_loc_area;
                     addr = addr.replace(/,/g, '+');
                     addr = addr.replace(/ /g, '');
-                    addr = addr+"+"+$rootScope.geoCityName;
+                    addr = addr+"+"+$stateParams.citySelected;
                     geoLocationService.getDirection(addr).success(function (json) {
                         console.log("Direction success",json);
 
@@ -675,18 +863,133 @@ angular.module('starter.controllers', [])
             getDirection();
 
         };
+
+        $scope.claim = function(){
+            var userDetails = LocalStorage.getObject('loginDetails');
+            var params = {claim_pageid:$scope.searchDetails.page_entry_id, claim_useridid:userDetails.userid};
+            $state.go("claim",params);
+        };
     })
 
-.controller('AccountCtrl', function($scope) {
-        $scope.settings = {
-            enableFriends: true
-        };
+.controller('ClaimCtrl', function($scope, $stateParams, LoginService, $ionicLoading, $ionicHistory, $ionicPopup) {
+     console.log("inside ClaimCtrl",$stateParams);
+     $scope.data = {};
+     $scope.submitClaim = function(){
+         var email = $scope.data.claim_email;
+         var name = $scope.data.claim_name;
+         var mobile = $scope.data.claim_mobile;
+         var details = $scope.data.claim_detail;
+         var claim_pageid = $stateParams.claim_pageid;
+         var claim_useridid = $stateParams.claim_useridid;
+
+         var re = /[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,4}/igm;
+         var errorString = "";
+
+         if (!name || name == '')
+         {
+             errorString = errorString + '<br/>* Valid Name';
+         }
+
+         if (!email || email == '' || !re.test(email))
+         {
+             errorString = errorString + '<br/>* Valid Email';
+         }
+
+         if (!mobile || mobile == '')
+         {
+             errorString = errorString + '<br/>* Valid Mobile';
+         }
+
+         if(errorString == ''){
+             $ionicLoading.show({
+                 template: 'loading..',
+                 animation: 'fade-in',
+                 noBackdrop: false
+             });
+             LoginService.claim(name, email, mobile,
+                 details, claim_pageid, claim_useridid).success(function (data) {
+                     console.log("Inside claim",data);
+                     $ionicLoading.hide();
+                     if (data.data.Claim && data.data.Claim[0].status == 'success') {
+                         $ionicPopup.alert({
+                             title: 'Success!',
+                             template: data.data.Claim[0].message,
+                             buttons: [
+                                 {
+                                     text: '<b>OK</b>',
+                                     type: 'button-assertive'
+                                 }
+                             ]
+                         });
+
+                         $ionicHistory.nextViewOptions({
+                             disableBack: true
+                         });
+                         $state.go('signin');
+                     }
+
+                     if (data.data.Error) {
+                         console.log("Inside ERROR message",data.data.Error[0]);
+                         $ionicHistory.nextViewOptions({
+                             disableBack: true
+                         });
+                         // $state.go('tab.dash');
+                         $ionicPopup.alert({
+                             title: 'Error!',
+                             template: data.data.Error[0].message,
+                             buttons: [
+                                 {
+                                     text: '<b>OK</b>',
+                                     type: 'button-assertive'
+                                 }
+                             ]
+                         });
+                     }
+
+                 }).error(function (data) {
+                     $ionicHistory.nextViewOptions({
+                         disableBack: true
+                     });
+                     $ionicLoading.hide();
+                     $ionicPopup.alert({
+                         title: 'Error!',
+                         template: 'Please try again!',
+                         buttons: [
+                             {
+                                 text: '<b>OK</b>',
+                                 type: 'button-assertive'
+                             }
+                         ]
+                     });
+                 });
+         } else{
+             $ionicPopup.alert({
+                 title: 'Please enter the mandatory fields',
+                 template: errorString,
+                 buttons: [
+                     {
+                         text: '<b>OK</b>',
+                         type: 'button-assertive'
+                     }
+                 ]
+             });
+         }
+
+     };
     })
 
 .directive('map', function() {
     return {
         restrict: 'A',
         link:function(scope, element, attrs){
+            var map = null;
+            var myLatlng = null;
+            var mapOptions = null;
+            var directionsService = null;
+            var directionsDisplay = null;
+            var myLocation = null;
+            var destination = null;
+            var request = null;
 
             var zValue = scope.$eval(attrs.zoom);
             var lat = scope.$eval(attrs.lat);
@@ -697,23 +1000,24 @@ angular.module('starter.controllers', [])
             console.log("directionLong", directionLong);
             console.log("directionLat", directionLat);
 
-            var myLatlng = new google.maps.LatLng(lat,lng),
-                mapOptions = {
-                    zoom: zValue,
-                    center: myLatlng
-                },
-                map = new google.maps.Map(element[0],mapOptions);
+            myLatlng = new google.maps.LatLng(lat,lng);
+
+            mapOptions = {
+                zoom: zValue,
+                center: myLatlng
+            };
+            map = new google.maps.Map(document.getElementById("map"),mapOptions);
 
 
-            var directionsService = new google.maps.DirectionsService();
-            var directionsDisplay = new google.maps.DirectionsRenderer();
+            directionsService = new google.maps.DirectionsService();
+            directionsDisplay = new google.maps.DirectionsRenderer();
 
-            var myLocation = new google.maps.LatLng(lat,lng);
+            myLocation = new google.maps.LatLng(lat,lng);
 
-            var destination = new google.maps.LatLng(directionLat, directionLong);
+            destination = new google.maps.LatLng(directionLat, directionLong);
 
 
-            var request = {
+             request = {
                 origin : myLocation,
                 destination : destination,
                 travelMode : google.maps.TravelMode.DRIVING
@@ -730,114 +1034,6 @@ angular.module('starter.controllers', [])
     };
 })
 
-.directive('ionSearchBar', function($timeout, $q) {
-        return {
-            restrict: 'E',
-            replace: true,
-            scope: { search: '=?filter' },
-            link: function(scope, element, attrs) {
-                scope.placeholder = attrs.placeholder || '';
-                scope.search = {value: '', focus: false};
-                if (attrs.class) {
-                    element.addClass(attrs.class);
-                }
-
-                // We need the actual input field to detect focus and blur
-                var inputElement = element.find('input')[0];
-
-                var airlines = [
-                    {"name":"Lao Central Airlines ","id":1},
-                    {"id":2,"name":"TAG"},
-                    {"id":3,"name":"Air Baltic"},
-                    {"name":"Dana Airlines","id":4}
-                ];
-
-                airlines = airlines.sort(function(a, b) {
-
-                    var airlineA = a.name.toLowerCase();
-                    var airlineB = b.name.toLowerCase();
-
-                    if(airlineA > airlineB) return 1;
-                    if(airlineA < airlineB) return -1;
-                    return 0;
-                });
-
-                var searchAirlines = function(searchFilter) {
-
-                    console.log('Searching airlines for ' + searchFilter);
-
-                    var deferred = $q.defer();
-
-                    var matches = airlines.filter( function(airline) {
-                        if(airline.name.toLowerCase().indexOf(searchFilter.toLowerCase()) !== -1 ) return true;
-                    });
-
-                    $timeout( function(){
-
-                        deferred.resolve( matches );
-
-                    }, 100);
-
-                    return deferred.promise;
-
-                };
-
-
-
-
-
-
-                // This function is triggered when the user presses the `Cancel` button
-                scope.cancelSearch = function() {
-                    // Manually trigger blur
-                    inputElement.blur();
-                    scope.search.value = '';
-                };
-
-                scope.search = function(){
-                    scope.search = { "airlines" : [], "value" : '' };
-                    console.log(scope.search.value);
-                    searchAirlines(scope.search.value).then(
-
-                            function (matches) {
-                                scope.search.airlines = matches;
-                                console.log("Inside Search ",matches);
-                            }
-                        );
-
-
-                };
-
-                // When the user focuses the search bar
-                angular.element(inputElement).bind('focus', function () {
-                    // We store the focus status in the model to show/hide the Cancel button
-                    scope.search.focus = 1;
-                    // Add a class to indicate focus to the search bar and the content area
-                    element.addClass('search-bar-focused');
-                    angular.element(document.querySelector('.has-search-bar')).addClass('search-bar-focused');
-                    // We need to call `$digest()` because we manually changed the model
-                    scope.$digest();
-                });
-                // When the user leaves the search bar
-                angular.element(inputElement).bind('blur', function() {
-                    scope.search.focus = 0;
-                    element.removeClass('search-bar-focused');
-                    angular.element(document.querySelector('.has-search-bar')).removeClass('search-bar-focused');
-                });
-            },
-            template: '<div class="search-bar bar bar-header item-input-inset">' +
-                '<label class="item-input-wrapper">' +
-                '<i class="icon ion-ios-search placeholder-icon"></i>' +
-                '<input type="search" placeholder="" ng-model="search.value" data="" ng-change="search()">' +
-                '</label>' +
-                '<button class="button button-clear button-assertive" ng-show="search.focus" ng-click="cancelSearch()">' +
-                'Cancel' +
-                '</button>' +
-                '</div>'
-
-        };
-    })
-
 .controller('MapCtrl', function($scope,$rootScope) {
         $scope.lat = $rootScope.lat;
         $scope.long = $rootScope.long;
@@ -850,8 +1046,8 @@ angular.module('starter.controllers', [])
 .controller('SignOutCtrl', function($scope, $rootScope, LocalStorage, $state, $ionicHistory) {
         console.log("Entered in SignOutCtrl");
 
-        LocalStorage.removeItem('userTypes');
         LocalStorage.removeItem('geoCity');
+        LocalStorage.removeItem('loginDetails');
 
         $ionicHistory.nextViewOptions({
             disableBack: true
@@ -876,12 +1072,11 @@ angular.module('starter.controllers', [])
                     'text'         : '=', /* Displayed text is mandatory */
                     'typeCode'     : '=', /* typeCode is mandatory */
                     'value'        : '=', /* Selected value binding is mandatory */
-                    'callback'     : '&mySaveCallback'
+                    'callback'     : '&'
                 },
 
-                controller: function($scope, $rootScope, $state){
+                controller: function($scope, $rootScope){
                     console.log("rootscope ::::::;",$rootScope.geoCityName);
-
                 },
 
                 link: function (scope, element, attrs) {
@@ -981,7 +1176,7 @@ angular.module('starter.controllers', [])
 
                         // Hide modal
                         scope.getSearch = function(str){
-                            console.log("inside search", str)
+                            console.log("inside search", str);
                         };
 
                         // Execute callback function
@@ -1011,8 +1206,10 @@ angular.module('starter.controllers', [])
                         scope.modal.remove();
                     });
 
+
+
                     /* Validate single with data */
-                    scope.validateSingle = function (item) {
+                    scope.validateSingle = function (item, typeCode) {
                         console.log("inside validateSingle",item);
                         // Set selected text
                         scope.text = item.text;
@@ -1033,7 +1230,7 @@ angular.module('starter.controllers', [])
                             console.log("inside Execute callback");
                             //var params = {typeCode:type_id};
                            // $state.go("tab.search",params);
-                            scope.callback ({id: scope.value,text:scope.text});
+                            scope.callback ()({id:scope.value,text:scope.text,typeCode:typeCode});
                         }
                     }
                 }

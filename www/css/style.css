@@ -131,3 +131,12 @@ button.ng-hide {
 .search-wrapper-light input, .search-wrapper-light input::-webkit-input-placeholder {
     color: #ffffff;
 }
+
+.button.button-icon.input-button {
+    position: absolute;
+    right: 0;
+    top: 5px;
+    color: #bbb;
+}
+
+

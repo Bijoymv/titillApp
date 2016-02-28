@@ -1,0 +1,28 @@
+<ion-view view-title="CLAIM THIS ADVERTISMENT">
+    <ion-content padding="true">
+        <div class="list">
+            <label class="item item-input">
+                <span class="input-label">* Name</span>
+                <input type="text" ng-model="data.claim_name">
+            </label>
+
+            <label class="item item-input">
+                <span class="input-label">* Email</span>
+                <input type="email" ng-model="data.claim_email">
+            </label>
+            <label class="item item-input">
+                <span class="input-label">* Mobile</span>
+                <input type="text" ng-model="data.claim_mobile">
+            </label>
+            <label class="item item-input">
+                <span class="input-label">Details related to Ad</span>
+                <input type="text" ng-model="data.claim_detail">
+            </label>
+
+        </div>
+        <div class="padding">
+            <button class="button button-block button-assertive" ng-click="submitClaim()">Submit</button>
+        </div>
+
+    </ion-content>
+</ion-view>

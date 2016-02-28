@@ -2,6 +2,79 @@ angular.module('starter.services', [])
 
 .factory('LoginService', function($http,$q) {
     return {
+        signUp: function(pop_email, pop_pwd, pop_con_pwd, pop_con_regdob, tit_select_box) {
+            var deferred = $q.defer();
+            var promise = deferred.promise;
+
+            /* var  postData = {
+             "login_password": pw,
+             "login_username": name
+             };*/
+
+            var headers = {
+                'Content-Type': 'application/json'
+            };
+
+            var req = {
+                method: 'GET',
+                url: 'http://demo.titill.com/mobileapiajax/register?' +
+                    'pop_email='+pop_email+'&pop_pwd='+pop_pwd+
+                    '&pop_con_pwd='+pop_con_pwd+'&pop_con_regdob='+pop_con_regdob+
+                    '&tit_select_box='+tit_select_box,
+                headers: headers
+            };
+
+            console.log(req.url);
+            $http(req).then(function (response) {
+                deferred.resolve(response);
+            }, function (error) {
+                deferred.reject(error);
+            });
+
+            promise.success = function(fn) {
+                promise.then(fn);
+                return promise;
+            };
+            promise.error = function(fn) {
+                promise.then(null, fn);
+                return promise;
+            };
+            return promise;
+        },
+        claim: function(claim_name, claim_email, claim_mobile, claim_detail, claim_pageid,claim_useridid) {
+            var deferred = $q.defer();
+            var promise = deferred.promise;
+
+            var headers = {
+                'Content-Type': 'application/json'
+            };
+
+            var req = {
+                method: 'GET',
+                url: 'http://demo.titill.com/mobileapiajax/advertisementclaim?' +
+                    'claim_name='+claim_name+'&claim_email='+claim_email+'&claim_useridid='+claim_useridid+
+                    '&claim_mobile='+claim_mobile+'&claim_detail='+claim_detail+
+                    '&claim_pageid='+claim_pageid,
+                headers: headers
+            };
+
+            console.log(req.url);
+            $http(req).then(function (response) {
+                deferred.resolve(response);
+            }, function (error) {
+                deferred.reject(error);
+            });
+
+            promise.success = function(fn) {
+                promise.then(fn);
+                return promise;
+            };
+            promise.error = function(fn) {
+                promise.then(null, fn);
+                return promise;
+            };
+            return promise;
+        },
         loginUser: function(name, pw) {
             var deferred = $q.defer();
             var promise = deferred.promise;
@@ -17,11 +90,11 @@ angular.module('starter.services', [])
 
             var req = {
                 method: 'GET',
-                url: 'http://demo.titill.com/mobileapi/loginajax?username='+name+'&password='+pw,
+                url: 'http://demo.titill.com/mobileapiajax/login?login_username='+name+'&login_password='+pw,
                 headers: headers
             };
 
-
+            console.log(req.url);
             $http(req).then(function (response) {
                 deferred.resolve(response);
             }, function (error) {
@@ -42,20 +115,17 @@ angular.module('starter.services', [])
             var deferred = $q.defer();
             var promise = deferred.promise;
 
-            var  postData = {
-                forgot_emailid: email
-            };
-
             var headers = {
                 'Content-Type': 'application/json'
             };
 
             var req = {
-                method: 'POST',
-                url: 'http://demo.titill.com/mobileapi/forgotpassword',
-                headers: headers,
-                data: postData
+                method: 'GET',
+                url: 'http://demo.titill.com/mobileapiajax/forgotpassword?forgot_emailid='+email,
+                headers: headers
             };
+
+            console.log(req.url);
 
             $http(req).then(function (response) {
                 deferred.resolve(response);
