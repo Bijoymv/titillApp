@@ -76,7 +76,8 @@
     </div>
 
     <ion-infinite-scroll
-            ng-if="!moredata"
+            ng-if="moredata"
+            immediate-check="false"
             distance="2%"
             icon="ion-loading-c"
             on-infinite="loadMore()">

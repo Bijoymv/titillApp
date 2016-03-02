@@ -114,6 +114,12 @@ angular.module('starter.controllers', [])
             var selectType = $scope.data.tit_select_box;
             var isChecked = $scope.data.isChecked;
 
+            var _calculateAge = function(birthday) { // birthday is a date
+                var ageDifMs = Date.now() - birthday.getTime();
+                var ageDate = new Date(ageDifMs); // miliseconds from epoch
+                return Math.abs(ageDate.getUTCFullYear() - 1970);
+            };
+
             if (!email || email == '' || !re.test(email))
             {
                 errorString = errorString + '<br/>* Valid Email';
@@ -131,7 +137,13 @@ angular.module('starter.controllers', [])
                 errorString = errorString + '<br/>* DOB';
             } else{
                 date = new Date($scope.data.pop_con_regdob);
-                dob = (date.getMonth() + 1) + '/' + date.getDate() + '/' +  date.getFullYear();
+               var age =  _calculateAge(date);
+
+                if(age < 13){
+                    errorString = errorString + '<br/>* Age should be greater than 13';
+                } else{
+                    dob = (date.getMonth() + 1) + '/' + date.getDate() + '/' +  date.getFullYear();
+                }
             }
 
             if(!selectType || selectType == ''){
@@ -403,6 +415,7 @@ angular.module('starter.controllers', [])
                    $scope.long = cityDetails.long;
                    $timeout(function() {
                        $scope.cityName = cityDetails.geoCityName;
+                       $rootScope.geoCityName = cityDetails.geoCityName;
                    }, 500);
 
                    $rootScope.geoCityName = cityDetails.geoCityName;
@@ -413,6 +426,11 @@ angular.module('starter.controllers', [])
            };
 
            var getCities = function (){
+               $ionicLoading.show({
+                   template: 'loading..',
+                   animation: 'fade-in',
+                   noBackdrop: false
+               });
                LoginService.getCities().success(function (data) {
                    var cityNames = new Array();
                    if (data.data.city_names[0].data) {
@@ -422,11 +440,13 @@ angular.module('starter.controllers', [])
                    }
                    $rootScope.cityNames = cityNames;
                    console.log("CityNames:::",$rootScope.cityNames);
+                   $ionicLoading.hide();
                    getGeoCity();
                }).error(function (data) {
                    console.log("error in fetching city names",data);
+                   $ionicLoading.hide();
                    $rootScope.cityNames = [];
-                   getGeoCity();
+                   getCities();
                });
            };
 
@@ -515,7 +535,7 @@ angular.module('starter.controllers', [])
     })
     })
 
-.controller('SearchCtrl', function($scope, SearchService, $stateParams, $ionicPopup, $state, $ionicLoading, $rootScope) {
+.controller('SearchCtrl', function($scope, SearchService, LocalStorage,$stateParams, $ionicPopup, $state, $ionicLoading, $rootScope) {
         // With the new view caching in Ionic, Controllers are only called
         // when they are recreated or on app start, instead of every page change.
         // To lisiten for when this page is active (for example, to refresh data),
@@ -524,14 +544,12 @@ angular.module('starter.controllers', [])
         //$scope.$on('$ionicView.enter', function(e) {
         //});
         var count,cityArray;
+        $scope.moredata = true;
         console.log("Reached search controller");
-        $ionicLoading.show({
-            template: 'loading..',
-            animation: 'fade-in',
-            noBackdrop: false
-        });
-        $scope.cityName     =   $rootScope.geoCityName;
-        console.log("cityName::::", $rootScope.geoCityName);
+        var cityName= LocalStorage.getObject('geoCity').geoCityName;
+
+        $scope.cityName     =   cityName;
+        console.log("cityName::::", cityName);
         $scope.typeNameSel  =   $rootScope.selectedTypeName;
         $scope.cityId       =   $rootScope.cityId;
         $scope.typeCode     =   $stateParams.typeCode;
@@ -565,6 +583,11 @@ angular.module('starter.controllers', [])
 
          var getUserList = function(selectedItem) {
             var params,userList;
+             $ionicLoading.show({
+                 template: 'loading..',
+                 animation: 'fade-in',
+                 noBackdrop: false
+             });
             if(selectedItem) {
                 $scope.cityName     =   selectedItem.text;
                 $scope.cityId       =   selectedItem.id;
@@ -578,7 +601,7 @@ angular.module('starter.controllers', [])
             SearchService.getUserList(params,count).success(function (data) {
                 console.log("getUserList",data);
                 userList = [];
-
+                $scope.items = userList;
                 if (data.data["Search Result"] && data.data["Search Result"][0]) {
                     userList = data.data["Search Result"][0].data;
                     $scope.items = userList;
@@ -587,13 +610,16 @@ angular.module('starter.controllers', [])
 
                 if (userList.length > 0) {
                     $scope.userData = true;
+                    $scope.moredata = true;
                 } else {
                     $scope.userData = false;
+                    $scope.moredata = false;
                 }
                 $ionicLoading.hide();
 
             }).error(function (data) {
                 $scope.userData = false;
+                $scope.moredata = false;
                 $ionicLoading.hide();
             });
         };
@@ -603,44 +629,46 @@ angular.module('starter.controllers', [])
 
         $scope.loadMore = function() {
             var params,userList;
-            $ionicLoading.show({
-                template: 'loading..',
-                animation: 'fade-in',
-                noBackdrop: false
-            });
-            $scope.moredata = false;
 
-            console.log("InsideloadMore");
-            params              =   { cityId:$scope.cityId, typeCode:$scope.typeCode };
-            count.lowerLimit    =   count.upperLimit;
-            count.upperLimit    =   count.upperLimit + 5;
+            if($scope.items.length > 0) {
 
-            SearchService.getNewUsers(params,count).then(function(items){
-                console.log("getNewUsers is called");
-                $ionicLoading.hide();
-                userList = [];
-                if (items.data["Search Result"] && items.data["Search Result"][0]) {
-                    userList = items.data["Search Result"][0].data;
-                    console.log("userlist inside loadmore",userList.length);
-                    if(userList.length > 0){
+                $scope.moredata = true;
+
+                console.log("InsideloadMore");
+                params = { cityId: $scope.cityId, typeCode: $scope.typeCode };
+                count.lowerLimit = count.upperLimit;
+                count.upperLimit = count.upperLimit + 5;
+                $ionicLoading.show({
+                    template: 'loading..',
+                    animation: 'fade-in',
+                    noBackdrop: false
+                });
+                SearchService.getNewUsers(params, count).then(function (items) {
+                    console.log("getNewUsers is called");
+                    $ionicLoading.hide();
+                    userList = [];
+                    if (items.data["Search Result"] && items.data["Search Result"][0]) {
+                        userList = items.data["Search Result"][0].data;
+                        console.log("userlist inside loadmore", userList.length);
+                        if (userList.length > 0) {
+                            $scope.moredata = true;
+                        } else {
+                            $scope.moredata = false;
+                        }
+                        $scope.items = $scope.items.concat(userList);
+                        console.log("$scope.items", $scope.items);
+
+                    } else {
+                        console.log("no data!!!!");
                         $scope.moredata = false;
-                    } else{
-                        $scope.moredata = true;
                     }
-                    $scope.items = $scope.items.concat(userList);
-                    console.log("$scope.items",$scope.items);
+                    $scope.$broadcast('scroll.infiniteScrollComplete');
 
-                } else{
-                    console.log("no data!!!!");
-                    $scope.moredata = true;
-                }
-                $scope.$broadcast('scroll.infiniteScrollComplete');
-                if($scope.items.length > 0) {
-                    $scope.userData = true;
-                }else{
-                    $scope.userData = false;
-                }
-            });
+
+                });
+            }else{
+                $scope.moredata = false;
+            }
         };
 
         $scope.callbackFunctionInController = function(item){
@@ -895,7 +923,7 @@ angular.module('starter.controllers', [])
              errorString = errorString + '<br/>* Valid Email';
          }
 
-         if (!mobile || mobile == '')
+         if (!mobile || mobile == '' || isNaN(mobile))
          {
              errorString = errorString + '<br/>* Valid Mobile';
          }
@@ -1046,6 +1074,7 @@ angular.module('starter.controllers', [])
 .controller('SignOutCtrl', function($scope, $rootScope, LocalStorage, $state, $ionicHistory) {
         console.log("Entered in SignOutCtrl");
 
+        LocalStorage.removeItem('userTypes');
         LocalStorage.removeItem('geoCity');
         LocalStorage.removeItem('loginDetails');
 
