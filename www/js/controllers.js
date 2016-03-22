@@ -548,38 +548,84 @@ angular.module('starter.controllers', [])
         console.log("Reached search controller");
         var cityName= LocalStorage.getObject('geoCity').geoCityName;
 
-        $scope.cityName     =   cityName;
-        console.log("cityName::::", cityName);
-        $scope.typeNameSel  =   $rootScope.selectedTypeName;
-        $scope.cityId       =   $rootScope.cityId;
-        $scope.typeCode     =   $stateParams.typeCode;
-        $scope.items        =   [];
-        $scope.searchVal    =   $rootScope.cityNames;
-
-        console.log("city names available::::",$rootScope.cityNames);
-        count       = {upperLimit:10, lowerLimit:0};
-        cityArray   = [];
-
-        Object.keys($rootScope.cityNames).forEach(function(key,index) {
-            // key: the name of the object key
-            // index: the ordinal position of the key within the object
-            cityArray.push({id: $rootScope.cityNames[key], text: key, checked: false, icon: null});
-        });
-
-        // for select box directive
-        $scope.countries                =   cityArray;
-        $scope.countries_text_single    =   'Choose different city';
-        $scope.countries_text_multiple  =   'Choose countries';
-        $scope.val                      =   {single: null, multiple: null};
-
-
-
-
         //default scenario
         if(!$stateParams.typeCode){
-                $scope.typeCode     =   'pca';
-                $scope.typeNameSel  =   'Pet Care';
+            $scope.typeCode     =   'pca';
+            $scope.typeNameSel  =   'Pet Care';
+        } else{
+            $scope.typeCode     =   $stateParams.typeCode;
+            $scope.typeNameSel  =   $rootScope.selectedTypeName;
         }
+
+        $scope.cityName     =   cityName;
+        console.log("cityName::::", cityName);
+
+        $scope.cityId       =   $rootScope.cityId;
+
+        console.log("typecode:::",$scope.typeCode);
+        $scope.items        =   [];
+
+        $ionicLoading.show({
+            template: '<ion-spinner icon="bubbles"></ion-spinner><br/>Acquiring Data!'
+        });
+
+        SearchService.getCityDetails($scope.typeCode).success(function (data) {
+            console.log("getCityDetails",data);
+            var cityDetails = [];
+            if (data.data["city_names"] && data.data["city_names"][0]) {
+               var cityList = data.data["city_names"][0].data;
+              for(var i=0;i<cityList.length;i++){
+                  cityDetails[cityList[i].name] = cityList[i].id;
+              }
+            }
+            $scope.searchVal = cityDetails;
+            console.log("city names available::::",cityDetails);
+            count       = {upperLimit:10, lowerLimit:0};
+            cityArray   = [];
+
+            Object.keys(cityDetails).forEach(function(key,index) {
+                // key: the name of the object key
+                // index: the ordinal position of the key within the object
+                cityArray.push({id: cityDetails[key], text: key, checked: false, icon: null});
+            });
+
+            // for select box directive
+            $scope.countries                =   cityArray;
+            console.log("cityArray",cityArray);
+            $scope.countries_text_single    =   'Choose different city';
+            $scope.countries_text_multiple  =   'Choose countries';
+            $scope.val                      =   {single: null, multiple: null};
+
+
+            $ionicLoading.hide();
+
+        }).error(function (data) {
+            $scope.searchVal    =   $rootScope.cityNames;
+            console.log("city names available::::",cityDetails);
+            count       = {upperLimit:10, lowerLimit:0};
+            cityArray   = [];
+            cityArray = $scope.searchVal;
+            Object.keys(cityDetails).forEach(function(key,index) {
+                // key: the name of the object key
+                // index: the ordinal position of the key within the object
+                cityArray.push({id: cityDetails[key], text: key, checked: false, icon: null});
+            });
+
+            // for select box directive
+            $scope.countries                =   cityArray;
+            $scope.countries_text_single    =   'Choose different city';
+            $scope.countries_text_multiple  =   'Choose countries';
+            $scope.val                      =   {single: null, multiple: null};
+            $ionicLoading.hide();
+        });
+
+
+
+
+
+
+
+
 
          var getUserList = function(selectedItem) {
             var params,userList;
@@ -676,7 +722,7 @@ angular.module('starter.controllers', [])
         };
     })
 
-.controller('SearchDetailCtrl', function($scope, LocalStorage, $stateParams, SearchService, $ionicLoading, $state, geoLocationService, $rootScope) {
+.controller('SearchDetailCtrl', function($scope, LocalStorage, $stateParams, SearchService, $ionicLoading, $state, geoLocationService, $rootScope, $ionicPopup) {
         var getUserImage = function() {
             var baseURL = "http://demo.titill.com/";
             SearchService.getSearchImage($stateParams.userId).success(function (data) {
@@ -843,11 +889,24 @@ angular.module('starter.controllers', [])
 
         getFollowers();
 
-        var onSuccessCall = function(){console.log("call is successfull");}
-        var onErrorCall = function(){console.log("call got an error");}
+        var onSuccessCall = function(){console.log("call is successfull");};
+        var onErrorCall = function(){console.log("call got an error");};
 
         $scope.callPhone = function(number){
-            window.plugins.CallNumber.callNumber(onSuccessCall, onErrorCall, number, true);
+                var confirmPopup = $ionicPopup.confirm({
+                    title: '',
+                    template: '<ul><li class="ion-android-call" data-pack="android" data-tags="telephone">&nbsp;&nbsp;&nbsp;'+number+'</li></ul>',
+                    okText: 'Call', // String (default: 'OK'). The text of the OK button.
+                    okType: 'button-assertive' // String (default: 'button-positive'). The type of the OK button.
+                });
+
+                confirmPopup.then(function(res) {
+                    if(res) {
+                        window.plugins.CallNumber.callNumber(onSuccessCall, onErrorCall, number, true);
+                    } else {
+                        console.log('Call cancelled');
+                    }
+                });
         };
         $scope.navigate = function(){
             console.log("inside navigate");
@@ -901,7 +960,10 @@ angular.module('starter.controllers', [])
 
 .controller('ClaimCtrl', function($scope, $stateParams, LoginService, $ionicLoading, $ionicHistory, $ionicPopup) {
      console.log("inside ClaimCtrl",$stateParams);
-     $scope.data = {};
+        $scope.data = {};
+        $scope.$on('$ionicView.beforeEnter', function (event, viewData) {
+            viewData.enableBack = true;
+        });
      $scope.submitClaim = function(){
          var email = $scope.data.claim_email;
          var name = $scope.data.claim_name;
@@ -938,10 +1000,28 @@ angular.module('starter.controllers', [])
                  details, claim_pageid, claim_useridid).success(function (data) {
                      console.log("Inside claim",data);
                      $ionicLoading.hide();
-                     if (data.data.Claim && data.data.Claim[0].status == 'success') {
+
+                     if (data.data.Error) {
+                         console.log("Inside ERROR message",data.data.Error[0]);
+                         /* $ionicHistory.nextViewOptions({
+                          disableBack: true
+                          });*/
+                         // $state.go('tab.dash');
+                         $ionicPopup.alert({
+                             title: 'Error!',
+                             template: data.data.Error[0].message,
+                             buttons: [
+                                 {
+                                     text: '<b>OK</b>',
+                                     type: 'button-assertive'
+                                 }
+                             ]
+                         });
+                     }
+                     else if (data.status == 200) {
                          $ionicPopup.alert({
                              title: 'Success!',
-                             template: data.data.Claim[0].message,
+                             template: "Your request sent to our support team successfully",
                              buttons: [
                                  {
                                      text: '<b>OK</b>',
@@ -956,23 +1036,7 @@ angular.module('starter.controllers', [])
                          $state.go('signin');
                      }
 
-                     if (data.data.Error) {
-                         console.log("Inside ERROR message",data.data.Error[0]);
-                         $ionicHistory.nextViewOptions({
-                             disableBack: true
-                         });
-                         // $state.go('tab.dash');
-                         $ionicPopup.alert({
-                             title: 'Error!',
-                             template: data.data.Error[0].message,
-                             buttons: [
-                                 {
-                                     text: '<b>OK</b>',
-                                     type: 'button-assertive'
-                                 }
-                             ]
-                         });
-                     }
+
 
                  }).error(function (data) {
                      $ionicHistory.nextViewOptions({

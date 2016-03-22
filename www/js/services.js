@@ -378,6 +378,39 @@ console.log("getNewUsers inside",url);
             };
             return promise;
         },
+        getCityDetails: function(typeCode){
+            var deferred = $q.defer();
+            var promise = deferred.promise;
+            var headers = {
+                'Content-Type': 'application/json'
+            };
+
+            var url = 'http://demo.titill.com/mobileapiajax/usertypecity/'+typeCode;
+
+            var req = {
+                method: 'GET',
+                url: url,
+                headers: headers
+            };
+
+            console.log(req.url);
+
+            $http(req).then(function (response) {
+                deferred.resolve(response);
+            }, function (error) {
+                deferred.reject(error);
+            });
+
+            promise.success = function(fn) {
+                promise.then(fn);
+                return promise;
+            };
+            promise.error = function(fn) {
+                promise.then(null, fn);
+                return promise;
+            };
+            return promise;
+        },
         getSearchImage: function(userId){
             var deferred = $q.defer();
             var promise = deferred.promise;

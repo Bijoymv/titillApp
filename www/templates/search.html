@@ -50,11 +50,11 @@
                             ng-if="!multiSelect"
                             class="item item-text-wrap"
                             ng-click='validateSingle(item,typeCode)'>
-                        <div class="fancy-select-icon" ng-if="item.icon != null">
-                            <i class="icon-{{item.text}}" style="background-image: url({{item.icon}})"></i>
-                        </div>
+
                         {{item.text}}
+
                     </label>
+                    <label ng-if="!items.length">Sorry no city available!</label>
                 </div>
             </ion-content>
         </ion-view>
